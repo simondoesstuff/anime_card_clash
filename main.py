@@ -15,7 +15,7 @@ SETTINGS = SimpleNamespace(
     raid=(0.67, 0.75),
     raid_restart=(0.65, 0.63)
 )
-BATTLE_STATUS = (0.345, 0.84)
+BATTLE_STATUS = SimpleNamespace(while_closed=(0.345, 0.84), while_open=(.5, .95))
 BATTLE_STATUS_COLOR = "0xFFFFFF"
 LEAVE_BATTLE = (0.402, 0.356)
 LEAVE_BATTLE_COLOR = "0xFFFFFF"
@@ -80,6 +80,9 @@ class CardClasher:
 
     def dismiss(self):
         self.click(DISMISS)
+        # this is because we're not sure if the server hop happens unless you press w
+        self.keys('w', duration=.1)
+        self.keys('s', duration=.1)
 
     def respawn(self):
         """
@@ -131,11 +134,40 @@ class CardClasher:
             i += 1
             sleep(0.1)
 
-    def keys(self, keys: Iterable, interval: float):
+    def keys(self, keys: Iterable, duration: float = 0, interval: float = 0, simultaneous=False):
+        """
+        Presses keys
+        @param keys: Iterable of keys to press
+        @param duration: Duration to hold each key down
+        @param interval: Interval between pressing keys
+        @param simultaneous: If True, all keys are pressed at the same time. Interval is used
+        between keys down and again, between keys up.
+        """
+
         self.window().activate()
-        [self.ahk.key_down(key) for key in keys]
-        sleep(interval)
-        [self.ahk.key_up(key) for key in keys]
+        
+        if simultaneous:
+            for key in keys:
+                self.ahk.key_down(key)
+                sleep(interval)
+
+            sleep(duration - interval)
+            
+            for key in keys:
+                self.ahk.key_up(key)
+                sleep(interval)
+        else:
+            for key in keys:
+                self.ahk.key_down(key)
+                sleep(duration)
+                self.ahk.key_up(key)
+                sleep(interval)
+                
+    def key(self, key: str, duration: float = 0):
+        """
+        Presses a single key for a given duration.
+        """
+        self.keys([key], duration=duration)
 
     def click(self, coord: tuple[float, float], and_wait=0.2):
         self.window().activate()
@@ -147,7 +179,7 @@ class CardClasher:
 
     def close_menu(self):
         self.window().activate()
-        self.keys(["\\", "Enter", "\\"], interval=0.2)
+        self.keys(["\\", "Right", "Enter", "\\"], interval=0.2)
 
     def stop_boss(self):
         # def toggle_auto_raid():
@@ -169,7 +201,7 @@ class CardClasher:
 
     def stop_pots(self):
         # goto settings
-        # set re-battle interval to 10
+        # set re-battle interval to a long time
         self.dismiss()
         self.click(SETTINGS.button)
         sleep(0.2)
@@ -177,21 +209,19 @@ class CardClasher:
         self.scroll(7)
         sleep(0.5)
         self.click(SETTINGS.inf)
-        sleep(0.1)
-        self.ahk.key_press("Right")
-        self.ahk.send("0")
+        self.click(SETTINGS.inf)
+        self.keys("10", interval=.1)
         self.click(SETTINGS.raid)
-        sleep(0.1)
-        self.ahk.key_press("Right")
-        self.ahk.send("0")
+        self.click(SETTINGS.raid)
+        self.keys("10", interval=.1)
         self.close_menu()
         # click leave battle when it appears
         # wait for battle status
         sleep(1.5)
         self.mouse_move(CENTER)
         sleep(0.1)
-        self.until_pixel(BATTLE_STATUS, BATTLE_STATUS_COLOR, throw=True)
-        self.click(BATTLE_STATUS)
+        self.until_pixel(BATTLE_STATUS.while_closed, BATTLE_STATUS_COLOR, throw=True)
+        self.click(BATTLE_STATUS.while_closed)
         self.until_pixel(LEAVE_BATTLE, LEAVE_BATTLE_COLOR, throw=True)
         self.click(LEAVE_BATTLE)
         sleep(1.5)
@@ -203,15 +233,11 @@ class CardClasher:
         self.scroll(7)
         sleep(0.5)
         self.click(SETTINGS.inf)
-        sleep(0.1)
-        self.ahk.key_press("Right")
-        self.ahk.key_press("Right")
-        self.ahk.key_press("Backspace")
+        self.click(SETTINGS.inf)
+        self.keys("1", interval=.1)
         self.click(SETTINGS.raid)
-        sleep(0.1)
-        self.ahk.key_press("Right")
-        self.ahk.key_press("Right")
-        self.ahk.key_press("Backspace")
+        self.click(SETTINGS.raid)
+        self.keys("1", interval=.1)
         self.close_menu()
         sleep(2)
 
@@ -224,22 +250,32 @@ class CardClasher:
         sleep(0.5)
 
     def start_boss(self):
+        self.window().activate()
         self.set_deck(DECK_SLOTS.boss)
-        self.keys("as", 1.1)
-        self.keys("a", 0.8)
-        self.keys("s", 1.55)
-        self.keys("as", 7.35)
+        self.keys("as", 1.1, simultaneous=True)
+        self.keys("a", 0.8, simultaneous=True)
+        self.keys("s", 1.55, simultaneous=True)
+        self.keys("as", 7.35, simultaneous=True)
         self.dismiss()
         sleep(0.5)
         self.ahk.send("e")
 
     def start_pots(self):
+        self.window().activate()
         self.set_deck(DECK_SLOTS.potion)
-        self.keys("sd", 1.1)
-        self.keys("d", 4.4)
+        self.keys("sd", 1.1, simultaneous=True)
+        self.keys("d", 4.4, simultaneous=True)
         self.dismiss()
         sleep(0.5)
         self.click(START_POTS)
+        self.close_menu()
+        
+    def try_close_battle(self):
+        """
+        Try to close the battle screen if it is open.
+        """
+        self.window().activate()
+        self.until_pixel(BATTLE_STATUS.while_open, BATTLE_STATUS_COLOR)
         self.close_menu()
 
     def is_connected(self):
@@ -250,9 +286,7 @@ class CardClasher:
         return False
 
     def toggle_sprint(self):
-        self.ahk.key_down("Shift")
-        sleep(0.1)
-        self.ahk.key_up("Shift")
+        self.key("Shift", 0.1)
 
     def main(self):
         print("Hello from anime-card-clash!")
@@ -275,6 +309,7 @@ class CardClasher:
 
             if mode != next_mode:
                 print(f"Starting {next_mode}")
+                self.try_close_battle()
 
                 # stop previous
                 if mode == "boss":
@@ -313,16 +348,6 @@ if __name__ == "__main__":
     #     CardClasher().main()
     # except Exception as e:
     #     print(e)
-
-    # cc = CardClasher()
-    # cc.window().activate()
-    # cc.set_deck(1)
-
-    # cc = CardClasher()
-    # cc.window().activate()
-    # cc.clean()
-    # cc.start_boss()
-    # exit(0)
 
     # cc = CardClasher()
     # while True:
