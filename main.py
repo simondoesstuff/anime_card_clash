@@ -50,7 +50,7 @@ def boss_ready():
 class CardClasher:
     def __init__(self) -> None:
         self.ahk = AHK(executable_path="./AutoHotkey/AutoHotkeyU32.exe")
-        self.mouse_speed = 3
+        self.mouse_speed: float = 2.5
 
     def window(self):
         window = self.ahk.find_window(title="Roblox")
@@ -60,7 +60,7 @@ class CardClasher:
 
         return window
 
-    def mouse_move(self, coord: tuple[float, float], speed=2.5, coord_mode="Window"):
+    def mouse_move(self, coord: tuple[float, float], speed: float = 1, coord_mode="Window"):
         _, _, width, height = self.window().get_position()
         x = coord[0] * width
         y = coord[1] * height
@@ -306,7 +306,6 @@ class CardClasher:
 
             if mode != next_mode:
                 print(f"Starting {next_mode}")
-                self.try_close_battle()
 
                 # stop previous
                 if mode == "boss":
@@ -321,6 +320,8 @@ class CardClasher:
                     self.start_boss()
                 else:
                     self.start_pots()
+
+                self.try_close_battle()
 
             if loop % 180 == 0:
                 self.dismiss()
