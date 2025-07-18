@@ -254,10 +254,11 @@ class CardClasher:
         self.window().activate()
         self.set_deck(DECK_SLOTS.potion)
         self.keys("sd", 1.1, simultaneous=True)
-        self.keys("d", 4.4, simultaneous=True)
+        self.key("d", 4.4)
         sleep(0.5)
         self.click(START_POTS)
         self.close_menu()
+        self.key("a", 1)
 
     def try_close_battle(self):
         """
