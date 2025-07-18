@@ -69,11 +69,11 @@ class CardClasher:
         self.ahk.mouse_drag(x, y, button='right', relative=True, coord_mode='Screen')
         
     def dismiss(self):
+        self.window().activate()
         self.mouse_move((.5, .05))
         self.ahk.click()
 
     def clean(self):
-        self.window().activate()
         self.dismiss()
         # "respawn"
         self.mouse_move(TELEPORT.button)
