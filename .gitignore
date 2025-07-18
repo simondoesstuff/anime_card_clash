@@ -9,3 +9,7 @@ wheels/
 # Virtual environments
 .venv
 .direnv
+
+# AHK system files
+AutoHotkey/*.Zone.Identifier
+AutoHotkey/compiler/*.Zone.Identifier
