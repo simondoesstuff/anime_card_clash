@@ -1,0 +1,9 @@
+[project]
+name = "anime-card-clash"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "ahk>=1.8.4",
+]
