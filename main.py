@@ -1,32 +1,35 @@
 import datetime
-from types import SimpleNamespace
-from typing import final
 from time import sleep
+from types import SimpleNamespace
+from typing import Iterable, final
 
 from ahk import AHK
 
-
-CENTER = (.5, .5)
-SETTINGS = (.09, .6)
-SETTINGS = SimpleNamespace(button=(.09, .6), inf=(.67, .3), raid=(.67, .75), raid_restart=(.65, .63), close=(.7, .15))
-BATTLE_STATUS = (.345, .84)
-BATTLE_STATUS_COLOR = '0xFFFFFF'
-LEAVE_BATTLE = (.402, .356)
-LEAVE_BATTLE_COLOR = '0xFFFFFF'
-TELEPORT = SimpleNamespace(button=(.09, .5), ninja=(.64, .36), lobby=(.64, .27))
-START_POTS = (.54, .47)
+CENTER = (0.5, 0.5)
+SETTINGS = (0.09, 0.6)
+SETTINGS = SimpleNamespace(
+    button=(0.09, 0.6),
+    inf=(0.67, 0.3),
+    raid=(0.67, 0.75),
+    raid_restart=(0.65, 0.63),
+    close=(0.7, 0.15),
+)
+BATTLE_STATUS = (0.345, 0.84)
+BATTLE_STATUS_COLOR = "0xFFFFFF"
+LEAVE_BATTLE = (0.402, 0.356)
+LEAVE_BATTLE_COLOR = "0xFFFFFF"
+TELEPORT = SimpleNamespace(button=(0.09, 0.5), ninja=(0.64, 0.36), lobby=(0.64, 0.27))
+START_POTS = (0.54, 0.47)
 DECK = SimpleNamespace(
-    button=(.04, .32),
-    deck1=(.09, .78),
-    offset=.04,
-    close=(.94, .16)
+    button=(0.04, 0.32), deck1=(0.09, 0.78), offset=0.04, close=(0.94, 0.16)
 )
 DISCONNECT = SimpleNamespace(
-    left=(.4, .4),
-    right=(.6, .4),
-    button=(.55, .58),
-    background='0x393B3D'
+    left=(0.4, 0.4), right=(0.6, 0.4), button=(0.55, 0.58), background="0x393B3D"
 )
+
+
+# TODO: auto close chat
+# TODO: auto close battle screen
 
 
 def boss_ready():
@@ -39,9 +42,9 @@ def boss_ready():
 @final
 class CardClasher:
     def __init__(self) -> None:
-        self.ahk = AHK(executable_path='./AutoHotkey/AutoHotkeyU32.exe')
+        self.ahk = AHK(executable_path="./AutoHotkey/AutoHotkeyU32.exe")
         self.mouse_speed = 3
-        
+
     def window(self):
         window = self.ahk.find_window(title="Roblox")
 
@@ -49,28 +52,28 @@ class CardClasher:
             raise ValueError("Can't find roblox")
 
         return window
-        
+
     def mouse_move(self, coord: tuple[float, float], speed=2.5, coord_mode="Window"):
         _, _, width, height = self.window().get_position()
-        x = coord[0] * width 
+        x = coord[0] * width
         y = coord[1] * height
         self.ahk.mouse_move(x, y, speed=speed, coord_mode=coord_mode)
-        
+
     def scroll(self, amount: int):
         self.window().activate()
-        direction = 'wheeldown' if amount > 0 else 'wheelup'
+        direction = "wheeldown" if amount > 0 else "wheelup"
 
         for _ in range(abs(amount)):
             self.ahk.click(button=direction)
-            
+
     def mouse_right_drag(self, offset: tuple[float, float], speed=1):
         x = offset[0]
         y = offset[1]
-        self.ahk.mouse_drag(x, y, button='right', relative=True, coord_mode='Screen')
-        
+        self.ahk.mouse_drag(x, y, button="right", relative=True, coord_mode="Screen")
+
     def dismiss(self):
         self.window().activate()
-        self.mouse_move((.5, .05))
+        self.mouse_move((0.5, 0.05))
         self.ahk.click()
 
     def clean(self):
@@ -79,52 +82,66 @@ class CardClasher:
         self.mouse_move(TELEPORT.button)
         self.ahk.click()
         self.mouse_move(TELEPORT.ninja)
-        sleep(.7)
+        sleep(0.7)
         self.ahk.click()
         self.mouse_move(TELEPORT.button)
         sleep(1.5)
         self.ahk.click()
         self.mouse_move(TELEPORT.lobby)
-        sleep(.7)
+        sleep(0.7)
         self.ahk.click()
         sleep(1.5)
-        
+
     def pixel_matches(self, coord: tuple[float, float], color: str):
         _, _, width, height = self.window().get_position()
         x = coord[0] * width
         y = coord[1] * height
         return self.ahk.pixel_get_color(x, y) == color
-        
-    def until(self, coord: tuple[float, float], color: str, throw=False):
+
+    def until_pixel(self, coord: tuple[float, float], color: str, throw=False):
+        # TODO: make this auto dismiss
+
         timeout = 10 if not throw else 30
         start_time = datetime.datetime.now()
         i = 0
 
         while True:
-            if datetime.datetime.now() - start_time > datetime.timedelta(seconds=timeout):
+            if datetime.datetime.now() - start_time > datetime.timedelta(
+                seconds=timeout
+            ):
                 if not throw:
                     return False
                 else:
-                    raise TimeoutError(f"Timeout while waiting for {coord} to be {color}")
-                    
+                    raise TimeoutError(
+                        f"Timeout while waiting for {coord} to be {color}"
+                    )
+
             if self.pixel_matches(coord, color):
                 return True
-                
+
             if i % 20 == 0:
                 self.dismiss()
 
             i += 1
             sleep(0.1)
-            
-    def keys_for(self, keys: str, time: float):
+
+    def keys(self, keys: Iterable, interval: float):
         self.window().activate()
-        [ self.ahk.key_down(key) for key in keys ]
-        sleep(time)
-        [ self.ahk.key_up(key) for key in keys ]
-        
-    def is_battling(self):
-        return self.until(BATTLE_STATUS, BATTLE_STATUS_COLOR)
-        
+        [self.ahk.key_down(key) for key in keys]
+        sleep(interval)
+        [self.ahk.key_up(key) for key in keys]
+
+    def click(self, coord: tuple[float, float], and_wait=0.2):
+        self.mouse_move(coord)
+        if and_wait:
+            sleep(and_wait)
+        self.ahk.click()
+        self.ahk.click()
+
+    def close_menu(self):
+        self.window().activate()
+        self.keys(["\\", "Enter", "\\"], interval=0.2)
+
     def stop_boss(self):
         # def toggle_auto_raid():
         #     self.mouse_move(SETTINGS.button)
@@ -137,107 +154,98 @@ class CardClasher:
         #     self.ahk.click()
         #     self.mouse_move(SETTINGS.close)
         #     self.ahk.click()
-            
+
         # toggle_auto_raid()
         sleep(13)
         # toggle_auto_raid()
         # sleep(1)
 
     def stop_pots(self):
-        self.mouse_move(SETTINGS.button)
-        self.ahk.click()
-        sleep(.2)
+        # 1. goto settings
+        # 3. set re-battle interval to 10
+        self.dismiss()
+        self.click(SETTINGS.button)
+        sleep(0.2)
         self.mouse_move(CENTER)
         self.scroll(7)
-        sleep(.5)
-        self.mouse_move(SETTINGS.inf)
-        self.ahk.click()
-        sleep(.1)
-        self.ahk.key_press('Right')
-        self.ahk.send('0')
-        self.mouse_move(SETTINGS.raid)
-        self.ahk.click()
-        sleep(.1)
-        self.ahk.key_press('Right')
-        self.ahk.send('0')
-        self.mouse_move(SETTINGS.close)
-        self.ahk.click()
-        
+        sleep(0.5)
+        self.click(SETTINGS.inf)
+        sleep(0.1)
+        self.ahk.key_press("Right")
+        self.ahk.send("0")
+        self.click(SETTINGS.raid)
+        sleep(0.1)
+        self.ahk.key_press("Right")
+        self.ahk.send("0")
+        self.click(SETTINGS.close)
+        # 1. close settings
+        # 3. wait for battle status
         sleep(1.5)
-        self.mouse_move(BATTLE_STATUS)
-        sleep(.1)
-        self.until(BATTLE_STATUS, BATTLE_STATUS_COLOR, throw=True)
-        self.ahk.click()
-        self.until(LEAVE_BATTLE, LEAVE_BATTLE_COLOR, throw=True)
-        self.mouse_move(LEAVE_BATTLE)
-        self.ahk.click()
+        self.mouse_move(CENTER)
+        sleep(0.1)
+        self.until_pixel(BATTLE_STATUS, BATTLE_STATUS_COLOR, throw=True)
+        self.click(BATTLE_STATUS)
+        self.until_pixel(LEAVE_BATTLE, LEAVE_BATTLE_COLOR, throw=True)
+        self.click(LEAVE_BATTLE)
         sleep(1.5)
-
-        self.mouse_move(SETTINGS.button)
-        self.ahk.click()
-        sleep(.2)
+        # 1. open settings
+        # 2. set re-battle interval to 10
+        self.click(SETTINGS.button)
+        sleep(0.2)
         self.mouse_move(CENTER)
         self.scroll(7)
-        sleep(.5)
-        self.mouse_move(SETTINGS.inf)
-        self.ahk.click()
-        sleep(.1)
-        self.ahk.key_press('Right')
-        self.ahk.key_press('Right')
-        self.ahk.key_press('Backspace')
-        self.mouse_move(SETTINGS.raid)
-        self.ahk.click()
-        sleep(.1)
-        self.ahk.key_press('Right')
-        self.ahk.key_press('Right')
-        self.ahk.key_press('Backspace')
-        self.mouse_move(SETTINGS.close)
-        self.ahk.click()
+        sleep(0.5)
+        self.click(SETTINGS.inf)
+        sleep(0.1)
+        self.ahk.key_press("Right")
+        self.ahk.key_press("Right")
+        self.ahk.key_press("Backspace")
+        self.click(SETTINGS.raid)
+        sleep(0.1)
+        self.ahk.key_press("Right")
+        self.ahk.key_press("Right")
+        self.ahk.key_press("Backspace")
+        self.click(SETTINGS.close)
         sleep(2)
-        
+
     def set_deck(self, deck: int):
-        self.mouse_move(DECK.button)
-        self.ahk.click()
-        coord = [ DECK.deck1[0] + DECK.offset * (deck - 1), DECK.deck1[1] ]
-        self.mouse_move(coord)
-        sleep(.5)
-        self.ahk.click()
-        self.mouse_move(DECK.close)
-        self.ahk.click()
-        sleep(.5)
+        self.dismiss()
+        self.click(DECK.button)
+        coord = [DECK.deck1[0] + DECK.offset * (deck - 1), DECK.deck1[1]]
+        self.click(coord, and_wait=0.5)
+        self.click(DECK.close)
+        sleep(0.5)
 
     def start_boss(self):
         self.set_deck(2)
-        self.keys_for('as', 1.1)
-        self.keys_for('a', .8)
-        self.keys_for('s', 1.55)
-        self.keys_for('as', 7.35)
+        self.keys("as", 1.1)
+        self.keys("a", 0.8)
+        self.keys("s", 1.55)
+        self.keys("as", 7.35)
         self.dismiss()
         sleep(0.5)
-        self.ahk.send('e')
+        self.ahk.send("e")
 
     def start_pots(self):
         self.set_deck(1)
-        self.keys_for('sd', 1.1)
-        self.keys_for('d', 4.4)
+        self.keys("sd", 1.1)
+        self.keys("d", 4.4)
         self.dismiss()
         sleep(0.5)
-        self.mouse_move(START_POTS)
-        self.ahk.click()
-        self.mouse_move(SETTINGS.close)
-        self.ahk.click()
-        
+        self.click(START_POTS)
+        self.close_menu()
+
     def is_connected(self):
         if not self.pixel_matches(DISCONNECT.left, DISCONNECT.background):
             return True
         if not self.pixel_matches(DISCONNECT.right, DISCONNECT.background):
             return True
         return False
-        
+
     def toggle_sprint(self):
-        self.ahk.key_down('Shift')
-        sleep(.1)
-        self.ahk.key_up('Shift')
+        self.ahk.key_down("Shift")
+        sleep(0.1)
+        self.ahk.key_up("Shift")
 
     def main(self):
         print("Hello from anime-card-clash!")
@@ -251,11 +259,10 @@ class CardClasher:
         while True:
             if not self.is_connected():
                 print("Disconnected, reconnecting...")
-                self.mouse_move(DISCONNECT.button)
-                self.ahk.click()
+                self.click(DISCONNECT.button)
+                sleep(12)
                 self.toggle_sprint()
                 mode = None
-                sleep(12)
 
             next_mode = "boss" if boss_ready() else "pots"
 
@@ -267,7 +274,7 @@ class CardClasher:
                     self.stop_boss()
                 elif mode == "pots":
                     self.stop_pots()
-                    
+
                 self.clean()
 
                 # start next
@@ -285,8 +292,7 @@ class CardClasher:
 
 
 if __name__ == "__main__":
-    # sleep(1)
-
+    sleep(1)
     CardClasher().main()
 
     # cc = CardClasher()
@@ -296,10 +302,10 @@ if __name__ == "__main__":
     #         cc.ahk.click()
     #         sleep(12)
     #         cc.clean()
-        # try:
-        #     CardClasher().main()
-        # except Exception as e:
-        #     print(e)
+    # try:
+    #     CardClasher().main()
+    # except Exception as e:
+    #     print(e)
 
     # cc = CardClasher()
     # cc.window().activate()
@@ -310,7 +316,7 @@ if __name__ == "__main__":
     # cc.clean()
     # cc.start_boss()
     # exit(0)
-    
+
     # cc = CardClasher()
     # while True:
     #     # get pixel color at current
@@ -319,3 +325,4 @@ if __name__ == "__main__":
     #     _, _, width, height = cc.window().get_position()
     #     current_pos = (current_pos[0] / width, current_pos[1] / height)
     #     print(f"Current position: {current_pos}, Color: {color}")
+
