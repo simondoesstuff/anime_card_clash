@@ -80,9 +80,6 @@ class CardClasher:
 
     def dismiss(self):
         self.click(DISMISS)
-        # this is because we're not sure if the server hop happens unless you press w
-        self.keys('w', duration=.1)
-        self.keys('s', duration=.1)
 
     def respawn(self):
         """
@@ -327,6 +324,9 @@ class CardClasher:
 
             if loop % 180 == 0:
                 self.dismiss()
+                # this is because we're not sure if the server hop happens unless you press w
+                self.keys('w', duration=.1)
+                self.keys('s', duration=.1)
 
             mode = next_mode
             loop += 1
