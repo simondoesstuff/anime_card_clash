@@ -8,10 +8,10 @@ from ahk import AHK
 
 CENTER = (0.5, 0.5)
 # where to click to dismiss popups
-DISMISS = (0.5, 1)
+DISMISS = (0.5, .99)
 SETTINGS = (0.09, 0.6)
 SETTINGS = SimpleNamespace(
-    button=(0.09, 0.6), inf=(0.67, 0.3), raid=(0.67, 0.75), raid_restart=(0.65, 0.63)
+    button=(0.09, 0.6), inf=(0.67, 0.3), raid=(0.67, 0.75), raid_restart=(0.65, 0.63), close=(.7, .16)
 )
 BATTLE_STATUS = SimpleNamespace(while_closed=(0.345, 0.84), while_open=(0.5, 0.95))
 BATTLE_STATUS_COLOR = "0xFFFFFF"
@@ -19,7 +19,7 @@ LEAVE_BATTLE = (0.402, 0.356)
 LEAVE_BATTLE_COLOR = "0xFFFFFF"
 TELEPORT = SimpleNamespace(button=(0.09, 0.5), ninja=(0.64, 0.36), lobby=(0.64, 0.27))
 START_POTS = (0.54, 0.47)
-DECK = SimpleNamespace(button=(0.04, 0.32), deck1=(0.09, 0.78), offset=0.04)
+DECK = SimpleNamespace(button=(0.04, 0.36), deck1=(0.09, 0.78), offset=0.04)
 # 1-indexed, only support for top row decks
 DECK_SLOTS = SimpleNamespace(
     boss=2,
@@ -30,7 +30,6 @@ DISCONNECT = SimpleNamespace(
 )
 
 
-# TODO: auto close chat
 # TODO: general check for failure and do a top level restart & rejoin
 
 
@@ -194,10 +193,11 @@ class CardClasher:
         sleep(13)
         # toggle_auto_raid()
         # sleep(1)
-
-    def stop_pots(self):
-        # goto settings
-        # set re-battle interval to a long time
+        
+    def set_tower_delay(self, delay: int):
+        """
+        Set the delay for the tower battle.
+        """
         self.dismiss()
         self.click(SETTINGS.button)
         sleep(0.2)
@@ -206,11 +206,14 @@ class CardClasher:
         sleep(0.5)
         self.click(SETTINGS.inf)
         self.click(SETTINGS.inf)
-        self.keys("10", interval=0.1)
-        self.click(SETTINGS.raid)
-        self.click(SETTINGS.raid)
-        self.keys("10", interval=0.1)
-        self.close_menu()
+        self.keys(str(delay), interval=0.1)
+        # manual close with mouse so keyboard nav involved in close_menu doesn't
+        # get stuck in the input field
+        self.click(SETTINGS.close)
+        sleep(2)
+
+    def stop_pots(self):
+        self.set_tower_delay(10)
         # click leave battle when it appears
         # wait for battle status
         sleep(1.5)
@@ -221,20 +224,7 @@ class CardClasher:
         self.until_pixel(LEAVE_BATTLE, LEAVE_BATTLE_COLOR, throw=True)
         self.click(LEAVE_BATTLE)
         sleep(1.5)
-        # goto settings
-        # set re-battle interval to 1
-        self.click(SETTINGS.button)
-        sleep(0.2)
-        self.mouse_move(CENTER)
-        self.scroll(7)
-        sleep(0.5)
-        self.click(SETTINGS.inf)
-        self.click(SETTINGS.inf)
-        self.keys("1", interval=0.1)
-        self.click(SETTINGS.raid)
-        self.click(SETTINGS.raid)
-        self.keys("1", interval=0.1)
-        self.close_menu()
+        self.set_tower_delay(1)
         sleep(2)
 
     def set_deck(self, deck: int):
@@ -270,8 +260,8 @@ class CardClasher:
         Try to close the battle screen if it is open.
         """
         self.window().activate()
-        self.until_pixel(BATTLE_STATUS.while_open, BATTLE_STATUS_COLOR)
-        self.close_menu()
+        if self.until_pixel(BATTLE_STATUS.while_open, BATTLE_STATUS_COLOR):
+            self.close_menu()
 
     def is_connected(self):
         if not self.pixel_matches(DISCONNECT.left, DISCONNECT.background):
@@ -280,14 +270,20 @@ class CardClasher:
             return True
         return False
 
+    def clean(self):
+        """
+        Initialize the environment to be ready for automation
+        """
+        self.set_tower_delay(1)
+        self.toggle_sprint()
+
     def toggle_sprint(self):
         self.key("Shift", 0.1)
 
     def main(self):
         print("Hello from [magenta bold]anime-card-clash[/magenta bold]! :)")
-        self.window().activate()
         print("[italic]I hope you didn't already press shift[/italic]")
-        self.toggle_sprint()
+        self.clean()
 
         loop = 0
         mode = None
@@ -297,7 +293,7 @@ class CardClasher:
                 print("[bold red]Disconnected, reconnecting...[/bold red]")
                 self.click(DISCONNECT.button)
                 sleep(12)
-                self.toggle_sprint()
+                self.clean()
                 mode = None
 
             next_mode = "boss" if boss_ready() else "pots"
@@ -339,23 +335,11 @@ if __name__ == "__main__":
     sleep(1)
     CardClasher().main()
 
-    # cc = CardClasher()
-    # while True:
-    #     if not cc.is_connected():
-    #         cc.mouse_move(DISCONNECT.button)
-    #         cc.ahk.click()
-    #         sleep(12)
-    #         cc.clean()
-    # try:
-    #     CardClasher().main()
-    # except Exception as e:
-    #     print(e)
-
-    # cc = CardClasher()
-    # while True:
-    #     # get pixel color at current
-    #     current_pos = cc.ahk.mouse_position
-    #     color = cc.ahk.pixel_get_color(*current_pos)
-    #     _, _, width, height = cc.window().get_position()
-    #     current_pos = (current_pos[0] / width, current_pos[1] / height)
-    #     print(f"Current position: {current_pos}, Color: {color}")
+    cc = CardClasher()
+    while True:
+        # get pixel color at current
+        current_pos = cc.ahk.mouse_position
+        color = cc.ahk.pixel_get_color(*current_pos)
+        _, _, width, height = cc.window().get_position()
+        current_pos = (current_pos[0] / width, current_pos[1] / height)
+        print(f"Current position: {current_pos}, Color: {color}")
