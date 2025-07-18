@@ -31,8 +31,6 @@ DISCONNECT = SimpleNamespace(
 
 
 # TODO: auto close chat
-# TODO: auto close battle screen
-# TODO: handle spontaneous rejoin
 
 
 def boss_ready():
@@ -103,8 +101,6 @@ class CardClasher:
         return self.ahk.pixel_get_color(x, y) == color
 
     def until_pixel(self, coord: tuple[float, float], color: str, throw=False):
-        # TODO: make this auto dismiss
-
         timeout = 10 if not throw else 30
         start_time = datetime.datetime.now()
         i = 0
@@ -122,9 +118,6 @@ class CardClasher:
 
             if self.pixel_matches(coord, color):
                 return True
-
-            if i % 20 == 0:
-                self.dismiss()
 
             i += 1
             sleep(0.1)
@@ -266,7 +259,6 @@ class CardClasher:
         self.set_deck(DECK_SLOTS.potion)
         self.keys("sd", 1.1, simultaneous=True)
         self.keys("d", 4.4, simultaneous=True)
-        self.dismiss()
         sleep(0.5)
         self.click(START_POTS)
         self.close_menu()
@@ -290,7 +282,7 @@ class CardClasher:
         self.key("Shift", 0.1)
 
     def main(self):
-        print("Hello from [magenta bold]anime-card-clash :)[/magenta bold]!")
+        print("Hello from [magenta bold]anime-card-clash[/magenta bold]! :)")
         self.window().activate()
         print("[italic]I hope you didn't already press shift[/italic]")
         self.toggle_sprint()
