@@ -2,6 +2,7 @@ import datetime
 from time import sleep
 from types import SimpleNamespace
 from typing import Iterable, final
+from rich import print
 
 from ahk import AHK
 
@@ -10,20 +11,15 @@ CENTER = (0.5, 0.5)
 DISMISS = (0.5, 0.05)
 SETTINGS = (0.09, 0.6)
 SETTINGS = SimpleNamespace(
-    button=(0.09, 0.6),
-    inf=(0.67, 0.3),
-    raid=(0.67, 0.75),
-    raid_restart=(0.65, 0.63)
+    button=(0.09, 0.6), inf=(0.67, 0.3), raid=(0.67, 0.75), raid_restart=(0.65, 0.63)
 )
-BATTLE_STATUS = SimpleNamespace(while_closed=(0.345, 0.84), while_open=(.5, .95))
+BATTLE_STATUS = SimpleNamespace(while_closed=(0.345, 0.84), while_open=(0.5, 0.95))
 BATTLE_STATUS_COLOR = "0xFFFFFF"
 LEAVE_BATTLE = (0.402, 0.356)
 LEAVE_BATTLE_COLOR = "0xFFFFFF"
 TELEPORT = SimpleNamespace(button=(0.09, 0.5), ninja=(0.64, 0.36), lobby=(0.64, 0.27))
 START_POTS = (0.54, 0.47)
-DECK = SimpleNamespace(
-    button=(0.04, 0.32), deck1=(0.09, 0.78), offset=0.04
-)
+DECK = SimpleNamespace(button=(0.04, 0.32), deck1=(0.09, 0.78), offset=0.04)
 # 1-indexed, only support for top row decks
 DECK_SLOTS = SimpleNamespace(
     boss=2,
@@ -131,7 +127,13 @@ class CardClasher:
             i += 1
             sleep(0.1)
 
-    def keys(self, keys: Iterable, duration: float = 0, interval: float = 0, simultaneous=False):
+    def keys(
+        self,
+        keys: Iterable,
+        duration: float = 0,
+        interval: float = 0,
+        simultaneous=False,
+    ):
         """
         Presses keys
         @param keys: Iterable of keys to press
@@ -142,14 +144,14 @@ class CardClasher:
         """
 
         self.window().activate()
-        
+
         if simultaneous:
             for key in keys:
                 self.ahk.key_down(key)
                 sleep(interval)
 
             sleep(duration - interval)
-            
+
             for key in keys:
                 self.ahk.key_up(key)
                 sleep(interval)
@@ -159,7 +161,7 @@ class CardClasher:
                 sleep(duration)
                 self.ahk.key_up(key)
                 sleep(interval)
-                
+
     def key(self, key: str, duration: float = 0):
         """
         Presses a single key for a given duration.
@@ -207,10 +209,10 @@ class CardClasher:
         sleep(0.5)
         self.click(SETTINGS.inf)
         self.click(SETTINGS.inf)
-        self.keys("10", interval=.1)
+        self.keys("10", interval=0.1)
         self.click(SETTINGS.raid)
         self.click(SETTINGS.raid)
-        self.keys("10", interval=.1)
+        self.keys("10", interval=0.1)
         self.close_menu()
         # click leave battle when it appears
         # wait for battle status
@@ -231,10 +233,10 @@ class CardClasher:
         sleep(0.5)
         self.click(SETTINGS.inf)
         self.click(SETTINGS.inf)
-        self.keys("1", interval=.1)
+        self.keys("1", interval=0.1)
         self.click(SETTINGS.raid)
         self.click(SETTINGS.raid)
-        self.keys("1", interval=.1)
+        self.keys("1", interval=0.1)
         self.close_menu()
         sleep(2)
 
@@ -266,7 +268,7 @@ class CardClasher:
         sleep(0.5)
         self.click(START_POTS)
         self.close_menu()
-        
+
     def try_close_battle(self):
         """
         Try to close the battle screen if it is open.
@@ -286,9 +288,9 @@ class CardClasher:
         self.key("Shift", 0.1)
 
     def main(self):
-        print("Hello from anime-card-clash!")
+        print("Hello from [magenta bold]anime-card-clash[/magenta bold]!")
         self.window().activate()
-        print("I hope you didn't already press shift")
+        print("[italic]I hope you didn't already press shift[/italic]")
         self.toggle_sprint()
 
         loop = 0
@@ -296,7 +298,7 @@ class CardClasher:
 
         while True:
             if not self.is_connected():
-                print("Disconnected, reconnecting...")
+                print("[bold red]Disconnected, reconnecting...[/bold red]")
                 self.click(DISCONNECT.button)
                 sleep(12)
                 self.toggle_sprint()
@@ -305,7 +307,7 @@ class CardClasher:
             next_mode = "boss" if boss_ready() else "pots"
 
             if mode != next_mode:
-                print(f"Starting {next_mode}")
+                print(f"[bold green]Starting {next_mode}[/bold green]")
                 self.try_close_battle()
 
                 # stop previous
@@ -325,8 +327,8 @@ class CardClasher:
             if loop % 180 == 0:
                 self.dismiss()
                 # this is because we're not sure if the server hop happens unless you press w
-                self.keys('w', duration=.1)
-                self.keys('s', duration=.1)
+                self.keys("w", duration=0.1)
+                self.keys("s", duration=0.1)
 
             mode = next_mode
             loop += 1
@@ -357,4 +359,3 @@ if __name__ == "__main__":
     #     _, _, width, height = cc.window().get_position()
     #     current_pos = (current_pos[0] / width, current_pos[1] / height)
     #     print(f"Current position: {current_pos}, Color: {color}")
-
