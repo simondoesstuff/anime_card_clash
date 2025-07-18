@@ -6,13 +6,14 @@ from typing import Iterable, final
 from ahk import AHK
 
 CENTER = (0.5, 0.5)
+# where to click to dismiss popups
+DISMISS = (0.5, 0.05)
 SETTINGS = (0.09, 0.6)
 SETTINGS = SimpleNamespace(
     button=(0.09, 0.6),
     inf=(0.67, 0.3),
     raid=(0.67, 0.75),
-    raid_restart=(0.65, 0.63),
-    close=(0.7, 0.15),
+    raid_restart=(0.65, 0.63)
 )
 BATTLE_STATUS = (0.345, 0.84)
 BATTLE_STATUS_COLOR = "0xFFFFFF"
@@ -21,7 +22,12 @@ LEAVE_BATTLE_COLOR = "0xFFFFFF"
 TELEPORT = SimpleNamespace(button=(0.09, 0.5), ninja=(0.64, 0.36), lobby=(0.64, 0.27))
 START_POTS = (0.54, 0.47)
 DECK = SimpleNamespace(
-    button=(0.04, 0.32), deck1=(0.09, 0.78), offset=0.04, close=(0.94, 0.16)
+    button=(0.04, 0.32), deck1=(0.09, 0.78), offset=0.04
+)
+# 1-indexed, only support for top row decks
+DECK_SLOTS = SimpleNamespace(
+    boss=2,
+    potion=1,
 )
 DISCONNECT = SimpleNamespace(
     left=(0.4, 0.4), right=(0.6, 0.4), button=(0.55, 0.58), background="0x393B3D"
@@ -30,6 +36,7 @@ DISCONNECT = SimpleNamespace(
 
 # TODO: auto close chat
 # TODO: auto close battle screen
+# TODO: handle spontaneous rejoin
 
 
 def boss_ready():
@@ -57,7 +64,7 @@ class CardClasher:
         _, _, width, height = self.window().get_position()
         x = coord[0] * width
         y = coord[1] * height
-        self.ahk.mouse_move(x, y, speed=speed, coord_mode=coord_mode)
+        self.ahk.mouse_move(x, y, speed=speed * self.mouse_speed, coord_mode=coord_mode)
 
     def scroll(self, amount: int):
         self.window().activate()
@@ -72,13 +79,12 @@ class CardClasher:
         self.ahk.mouse_drag(x, y, button="right", relative=True, coord_mode="Screen")
 
     def dismiss(self):
-        self.window().activate()
-        self.mouse_move((0.5, 0.05))
-        self.ahk.click()
+        self.click(DISMISS)
 
-    def clean(self):
-        self.dismiss()
-        # "respawn"
+    def respawn(self):
+        """
+        teleport to ninja and back to lobby to reset position
+        """
         self.mouse_move(TELEPORT.button)
         self.ahk.click()
         self.mouse_move(TELEPORT.ninja)
@@ -132,6 +138,7 @@ class CardClasher:
         [self.ahk.key_up(key) for key in keys]
 
     def click(self, coord: tuple[float, float], and_wait=0.2):
+        self.window().activate()
         self.mouse_move(coord)
         if and_wait:
             sleep(and_wait)
@@ -161,8 +168,8 @@ class CardClasher:
         # sleep(1)
 
     def stop_pots(self):
-        # 1. goto settings
-        # 3. set re-battle interval to 10
+        # goto settings
+        # set re-battle interval to 10
         self.dismiss()
         self.click(SETTINGS.button)
         sleep(0.2)
@@ -177,9 +184,9 @@ class CardClasher:
         sleep(0.1)
         self.ahk.key_press("Right")
         self.ahk.send("0")
-        self.click(SETTINGS.close)
-        # 1. close settings
-        # 3. wait for battle status
+        self.close_menu()
+        # click leave battle when it appears
+        # wait for battle status
         sleep(1.5)
         self.mouse_move(CENTER)
         sleep(0.1)
@@ -188,8 +195,8 @@ class CardClasher:
         self.until_pixel(LEAVE_BATTLE, LEAVE_BATTLE_COLOR, throw=True)
         self.click(LEAVE_BATTLE)
         sleep(1.5)
-        # 1. open settings
-        # 2. set re-battle interval to 10
+        # goto settings
+        # set re-battle interval to 1
         self.click(SETTINGS.button)
         sleep(0.2)
         self.mouse_move(CENTER)
@@ -205,7 +212,7 @@ class CardClasher:
         self.ahk.key_press("Right")
         self.ahk.key_press("Right")
         self.ahk.key_press("Backspace")
-        self.click(SETTINGS.close)
+        self.close_menu()
         sleep(2)
 
     def set_deck(self, deck: int):
@@ -213,11 +220,11 @@ class CardClasher:
         self.click(DECK.button)
         coord = [DECK.deck1[0] + DECK.offset * (deck - 1), DECK.deck1[1]]
         self.click(coord, and_wait=0.5)
-        self.click(DECK.close)
+        self.close_menu()
         sleep(0.5)
 
     def start_boss(self):
-        self.set_deck(2)
+        self.set_deck(DECK_SLOTS.boss)
         self.keys("as", 1.1)
         self.keys("a", 0.8)
         self.keys("s", 1.55)
@@ -227,7 +234,7 @@ class CardClasher:
         self.ahk.send("e")
 
     def start_pots(self):
-        self.set_deck(1)
+        self.set_deck(DECK_SLOTS.potion)
         self.keys("sd", 1.1)
         self.keys("d", 4.4)
         self.dismiss()
@@ -275,7 +282,7 @@ class CardClasher:
                 elif mode == "pots":
                     self.stop_pots()
 
-                self.clean()
+                self.respawn()
 
                 # start next
                 if next_mode == "boss":
