@@ -8,10 +8,14 @@ from ahk import AHK
 
 CENTER = (0.5, 0.5)
 # where to click to dismiss popups
-DISMISS = (0.5, .99)
+DISMISS = (0.5, 0.99)
 SETTINGS = (0.09, 0.6)
 SETTINGS = SimpleNamespace(
-    button=(0.09, 0.6), inf=(0.67, 0.3), raid=(0.67, 0.75), raid_restart=(0.65, 0.63), close=(.7, .16)
+    button=(0.09, 0.6),
+    inf=(0.67, 0.3),
+    raid=(0.67, 0.75),
+    raid_restart=(0.65, 0.63),
+    close=(0.7, 0.16),
 )
 BATTLE_STATUS = SimpleNamespace(while_closed=(0.345, 0.84), while_open=(0.5, 0.95))
 BATTLE_STATUS_COLOR = "0xFFFFFF"
@@ -110,7 +114,7 @@ class CardClasher:
                 seconds=timeout
             ):
                 if not throw:
-                    print(f"[yellow]Timeout while waiting for {coord} to be {color}[/yellow]")
+                    print(f"Timeout while waiting for {coord} to be {color}")
                     return False
                 else:
                     raise TimeoutError(
@@ -193,7 +197,7 @@ class CardClasher:
         sleep(13)
         # toggle_auto_raid()
         # sleep(1)
-        
+
     def set_tower_delay(self, delay: int):
         """
         Set the delay for the tower battle.
@@ -282,7 +286,7 @@ class CardClasher:
 
     def main(self):
         print("Hello from [magenta bold]anime-card-clash[/magenta bold]! :)")
-        print("[italic]I hope you didn't already press shift[/italic]")
+        print("[italic]I hope you didn't already press 'shift'[/italic]\n")
         self.clean()
 
         loop = 0
@@ -304,7 +308,7 @@ class CardClasher:
                 # stop previous
 
                 if mode is not None:
-                    print(f"[green]Stopping {next_mode}[/green]")
+                    print(f"[green bold]Stopping {next_mode}[/green bold]")
 
                 if mode == "boss":
                     self.stop_boss()
