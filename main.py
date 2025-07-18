@@ -31,6 +31,7 @@ DISCONNECT = SimpleNamespace(
 
 
 # TODO: auto close chat
+# TODO: general check for failure and do a top level restart & rejoin
 
 
 def boss_ready():
@@ -110,6 +111,7 @@ class CardClasher:
                 seconds=timeout
             ):
                 if not throw:
+                    print(f"[yellow]Timeout while waiting for {coord} to be {color}[/yellow]")
                     return False
                 else:
                     raise TimeoutError(
@@ -306,7 +308,7 @@ class CardClasher:
                 # stop previous
 
                 if mode is not None:
-                    print(f"[yellow]Stopping {next_mode}[/yellow]")
+                    print(f"[green]Stopping {next_mode}[/green]")
 
                 if mode == "boss":
                     self.stop_boss()
