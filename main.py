@@ -8,7 +8,7 @@ from ahk import AHK
 
 CENTER = (0.5, 0.5)
 # where to click to dismiss popups
-DISMISS = (0.5, 0.05)
+DISMISS = (0.5, 1)
 SETTINGS = (0.09, 0.6)
 SETTINGS = SimpleNamespace(
     button=(0.09, 0.6), inf=(0.67, 0.3), raid=(0.67, 0.75), raid_restart=(0.65, 0.63)
@@ -290,7 +290,7 @@ class CardClasher:
         self.key("Shift", 0.1)
 
     def main(self):
-        print("Hello from [magenta bold]anime-card-clash[/magenta bold]!")
+        print("Hello from [magenta bold]anime-card-clash :)[/magenta bold]!")
         self.window().activate()
         print("[italic]I hope you didn't already press shift[/italic]")
         self.toggle_sprint()
@@ -312,6 +312,10 @@ class CardClasher:
                 print(f"[bold green]Starting {next_mode}[/bold green]")
 
                 # stop previous
+
+                if mode is not None:
+                    print(f"[yellow]Stopping {next_mode}[/yellow]")
+
                 if mode == "boss":
                     self.stop_boss()
                 elif mode == "pots":
@@ -329,9 +333,8 @@ class CardClasher:
 
             if loop % 180 == 0:
                 self.dismiss()
-                # this is because we're not sure if the server hop happens unless you press w
-                self.keys("w", duration=0.1)
-                self.keys("s", duration=0.1)
+                # # this is because we're not sure if the server hop happens unless you press w
+                # self.key("Space", duration=0.1)
 
             mode = next_mode
             loop += 1
