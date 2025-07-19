@@ -13,6 +13,21 @@ class CLI:
         """Start the main functionality"""
         self.cc.main()
         
+    def stop_pots(self):
+        return self.cc.stop_pots()
+    
+    def stop_boss(self):
+        self.cc.stop_boss()
+        
+    def start_pots(self):
+        self.cc.start_pots()
+        
+    def start_boss(self):
+        self.cc.start_boss()
+        
+    def clean(self):
+        self.cc.clean()
+        
     def pixel_coords(self):
         """For 5 seconds, prints the current mouse position and pixel color."""
         for _ in range(5):
