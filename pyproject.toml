@@ -3,8 +3,28 @@ name = "anime-card-clasher"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = "==3.12.*"
 dependencies = [
+    "easyocr",
+    "pyautogui",
+    "pydirectinput",
+    "pygetwindow",
+    "numpy",
+    "torch",
+    "torchvision",
+    "torchaudio",
     "ahk>=1.8.4",
     "rich>=14.0.0",
+    "mss>=10.0.0",
 ]
+
+# Tell uv about the special PyTorch download server
+[[tool.uv.index]]
+name = "pytorch-cuda"
+url = "https://download.pytorch.org/whl/cu121" # Use the URL from the PyTorch website
+
+# Tell uv to ONLY get these specific packages from that server
+[tool.uv.sources]
+torch = { index = "pytorch-cuda" }
+torchvision = { index = "pytorch-cuda" }
+torchaudio = { index = "pytorch-cuda" }

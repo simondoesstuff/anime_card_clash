@@ -18,7 +18,7 @@
       {
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
-            tesseract4
+            uv
           ];
         };
       }
