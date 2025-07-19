@@ -1,7 +1,12 @@
 import inspect
 import time
+import body
 from card_clasher import CardClasher
 from rich import print
+
+from config import LEAVE_BATTLE
+import ocr
+from utils.types import Rect
 
 
 class CLI:
@@ -28,12 +33,18 @@ class CLI:
     def clean(self):
         self.cc.clean()
         
+    def respawn(self):
+        self.cc.respawn()
+    
     def pixel_coords(self):
         """For 5 seconds, prints the current mouse position and pixel color."""
+        print('...')
+        time.sleep(1)
+
         for _ in range(5):
-            current_pos = self.cc.ahk.mouse_position
-            color = self.cc.ahk.pixel_get_color(*current_pos)
-            _, _, width, height = self.cc.window().get_position()
+            current_pos = body.ahk.mouse_position
+            color = body.ahk.pixel_get_color(*current_pos)
+            _, _, width, height = body.roblox().get_position()
             current_pos = (current_pos[0] / width, current_pos[1] / height)
             print(f"Position: {current_pos}, Color: {color}")
             time.sleep(1)

@@ -5,7 +5,7 @@ from typing import Iterable, final
 from rich import print
 
 from ahk import AHK
-from body import click, key, keys, mouse_move, pixel_matches, roblox, scroll, until_pixel
+from body import click, key, keys, mouse_move, pixel_matches, roblox, scroll, until_pixel, until_text
 from config import *
 from utils.logging import tprint
 
@@ -35,17 +35,21 @@ class CardClasher:
         teleport to ninja and back to lobby to reset position
         """
         roblox().activate()
-        mouse_move(TELEPORT.button)
-        click()
-        mouse_move(TELEPORT.ninja)
-        sleep(0.7)
-        click()
-        mouse_move(TELEPORT.button)
+        click(TELEPORT.button)
+
+        if not until_text(TELEPORT.menu_text, "teleport"):
+            tprint("[red bold]Couldn't open the teleport menu[/red bold]")
+            return
+
+        click(TELEPORT.ninja)
         sleep(1.5)
-        click()
-        mouse_move(TELEPORT.lobby)
-        sleep(0.7)
-        click()
+        click(TELEPORT.button)
+
+        if not until_text(TELEPORT.menu_text, "teleport"):
+            tprint("[red bold]Couldn't open the teleport menu[/red bold]")
+            return
+
+        click(TELEPORT.lobby)
         sleep(1.5)
 
     def close_menu(self):
@@ -89,7 +93,6 @@ class CardClasher:
         # manual close with mouse so keyboard nav involved in close_menu doesn't
         # get stuck in the input field
         click(SETTINGS.close)
-        sleep(2)
 
     def stop_pots(self):
         roblox().activate()
@@ -97,8 +100,6 @@ class CardClasher:
         # body.click leave battle when it appears
         # wait for battle status
         sleep(1.5)
-        mouse_move(CENTER)
-        sleep(0.1)
         
         try:
             if not until_pixel(BATTLE_STATUS.while_closed, BATTLE_STATUS_COLOR):
@@ -107,13 +108,11 @@ class CardClasher:
 
             click(BATTLE_STATUS.while_closed)
 
-            if not until_pixel(LEAVE_BATTLE, LEAVE_BATTLE_COLOR):
+            if not until_text(LEAVE_BATTLE, "continue later", timeout=30):
                 tprint("[bold red]Can't find the \"leave battle\" button[/bold red]")
                 return
-            else:
-                tprint("Leaving battle...")
 
-            click(LEAVE_BATTLE)
+            click(LEAVE_BATTLE.pos)
         finally:
             click(BATTLE_STATUS.while_closed)  # no harm clicking it while not in battle
             sleep(1.5)
@@ -124,7 +123,7 @@ class CardClasher:
         roblox().activate()
         self.dismiss()
         click(DECK.button)
-        coord = [DECK.deck1[0] + DECK.offset * (deck - 1), DECK.deck1[1]]
+        coord = (DECK.deck1[0] + DECK.offset * (deck - 1), DECK.deck1[1])
         click(coord, and_wait=0.5)
         self.close_menu()
         sleep(0.5)

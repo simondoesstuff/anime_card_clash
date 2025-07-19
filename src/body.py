@@ -5,7 +5,9 @@ from ahk import AHK
 from rich import print
 
 from config import DISMISS
+import ocr
 from utils.logging import tprint
+from utils.types import Rect
 
 
 # Wraps libraries for interfacing with the outside
@@ -30,6 +32,12 @@ def mouse_move(
     x = coord[0] * width
     y = coord[1] * height
     ahk.mouse_move(x, y, speed=speed * _mouse_speed, coord_mode=coord_mode)
+    
+    
+def mouse_pos() -> tuple[float, float]:
+    x, y = ahk.mouse_position()
+    _, _, width, height = roblox().get_position()
+    return (x / width, y / height)
 
 
 def scroll(amount: int):
@@ -60,6 +68,7 @@ def until_pixel(coord: tuple[float, float], color: str):
     """
     timeout = 15
     start_time = datetime.datetime.now()
+    mouse_move(DISMISS)
 
     while not pixel_matches(coord, color):
         if datetime.datetime.now() - start_time > datetime.timedelta(
@@ -68,7 +77,22 @@ def until_pixel(coord: tuple[float, float], color: str):
             tprint(f"Timeout while waiting for {coord} to be {color}")
             return False
 
-        click(DISMISS)
+        click()
+        sleep(0.2)
+
+    return True
+    
+    
+def until_text(region: Rect, text: str, timeout: int = 15, window_title: str = "Roblox"):
+    start_time = datetime.datetime.now()
+    mouse_move(DISMISS)
+    
+    while not ocr.try_text(region, text, window_title):
+        if datetime.datetime.now() - start_time > datetime.timedelta(seconds=timeout):
+            tprint(f"Timeout while waiting for text '{text}' in region {region}")
+            return False
+        
+        click()
         sleep(0.2)
 
     return True
