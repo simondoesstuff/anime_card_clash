@@ -107,7 +107,6 @@ class CardClasher:
     def until_pixel(self, coord: tuple[float, float], color: str, throw=False):
         timeout = 10 if not throw else 30
         start_time = datetime.datetime.now()
-        i = 0
 
         while True:
             if datetime.datetime.now() - start_time > datetime.timedelta(
@@ -123,9 +122,9 @@ class CardClasher:
 
             if self.pixel_matches(coord, color):
                 return True
-
-            i += 1
-            sleep(0.1)
+                
+            self.dismiss()
+            sleep(0.2)
 
     def keys(
         self,
