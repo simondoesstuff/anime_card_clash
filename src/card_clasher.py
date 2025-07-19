@@ -5,16 +5,12 @@ from typing import Iterable, final
 from rich import print
 
 from ahk import AHK
+from body import click, key, keys, mouse_move, pixel_matches, roblox, scroll, until_pixel
 from config import *
 from utils.logging import tprint
 
 
 #TODO: general check for failure and do a top level restart & rejoin
-
-
-def tprint(*args, **kwargs):
-    time_str = datetime.datetime.now().strftime("%T")
-    print(f"[bold white][{time_str}][/bold white]", *args, **kwargs)
 
 
 def boss_ready():
@@ -26,231 +22,137 @@ def boss_ready():
 
 @final
 class CardClasher:
-    def __init__(self) -> None:
-        self.ahk = AHK(executable_path="./AutoHotkey/AutoHotkeyU32.exe")
-        self.mouse_speed: float = 2.5
-
-    def window(self):
-        window = self.ahk.find_window(title="Roblox")
-
-        if not window:
-            raise ValueError("Can't find roblox")
-
-        return window
-
-    def mouse_move(
-        self, coord: tuple[float, float], speed: float = 1, coord_mode="Window"
-    ):
-        _, _, width, height = self.window().get_position()
-        x = coord[0] * width
-        y = coord[1] * height
-        self.ahk.mouse_move(x, y, speed=speed * self.mouse_speed, coord_mode=coord_mode)
-
-    def scroll(self, amount: int):
-        self.window().activate()
-        direction = "wheeldown" if amount > 0 else "wheelup"
-
-        for _ in range(abs(amount)):
-            self.ahk.click(button=direction)
-
-    def mouse_right_drag(self, offset: tuple[float, float], speed=1):
-        x = offset[0]
-        y = offset[1]
-        self.ahk.mouse_drag(x, y, button="right", relative=True, coord_mode="Screen")
+    def __init__(self):
+        # TODO: possible to remove this state?
+        self._is_sprinting = False
 
     def dismiss(self):
-        self.click(DISMISS)
+        roblox().activate()
+        click(DISMISS)
 
     def respawn(self):
         """
         teleport to ninja and back to lobby to reset position
         """
-        self.mouse_move(TELEPORT.button)
-        self.ahk.click()
-        self.mouse_move(TELEPORT.ninja)
+        roblox().activate()
+        mouse_move(TELEPORT.button)
+        click()
+        mouse_move(TELEPORT.ninja)
         sleep(0.7)
-        self.ahk.click()
-        self.mouse_move(TELEPORT.button)
+        click()
+        mouse_move(TELEPORT.button)
         sleep(1.5)
-        self.ahk.click()
-        self.mouse_move(TELEPORT.lobby)
+        click()
+        mouse_move(TELEPORT.lobby)
         sleep(0.7)
-        self.ahk.click()
+        click()
         sleep(1.5)
-
-    def pixel_matches(self, coord: tuple[float, float], color: str):
-        _, _, width, height = self.window().get_position()
-        x = coord[0] * width
-        y = coord[1] * height
-        return self.ahk.pixel_get_color(x, y) == color
-
-    def until_pixel(self, coord: tuple[float, float], color: str, throw=False):
-        timeout = 10 if not throw else 30
-        start_time = datetime.datetime.now()
-
-        while True:
-            if datetime.datetime.now() - start_time > datetime.timedelta(
-                seconds=timeout
-            ):
-                if not throw:
-                    tprint(f"Timeout while waiting for {coord} to be {color}")
-                    return False
-                else:
-                    raise TimeoutError(
-                        f"Timeout while waiting for {coord} to be {color}"
-                    )
-
-            if self.pixel_matches(coord, color):
-                return True
-
-            self.dismiss()
-            sleep(0.2)
-
-    def keys(
-        self,
-        keys: Iterable,
-        duration: float = 0,
-        interval: float = 0,
-        simultaneous=False,
-    ):
-        """
-        Presses keys
-        @param keys: Iterable of keys to press
-        @param duration: Duration to hold each key down
-        @param interval: Interval between pressing keys
-        @param simultaneous: If True, all keys are pressed at the same time. Interval is used
-        between keys down and again, between keys up.
-        """
-
-        self.window().activate()
-
-        if simultaneous:
-            for key in keys:
-                self.ahk.key_down(key)
-                sleep(interval)
-
-            sleep(duration - interval)
-
-            for key in keys:
-                self.ahk.key_up(key)
-                sleep(interval)
-        else:
-            for key in keys:
-                self.ahk.key_down(key)
-                sleep(duration)
-                self.ahk.key_up(key)
-                sleep(interval)
-
-    def key(self, key: str, duration: float = 0):
-        """
-        Presses a single key for a given duration.
-        """
-        self.keys([key], duration=duration)
-
-    def click(self, coord: tuple[float, float], and_wait=0.2):
-        self.window().activate()
-        self.mouse_move(coord)
-        if and_wait:
-            sleep(and_wait)
-        self.ahk.click()
-        self.ahk.click()
 
     def close_menu(self):
-        self.window().activate()
-        self.keys(["\\", "Right", "Enter", "\\"], interval=0.2)
+        roblox().activate()
+        keys(["\\", "Right", "Enter", "\\"], interval=0.2)
 
     def stop_boss(self):
-        # def toggle_auto_raid():
-        #     self.mouse_move(SETTINGS.button)
-        #     self.ahk.click()
-        #     sleep(.2)
-        #     self.mouse_move(CENTER)
-        #     self.scroll(7)
-        #     sleep(.5)
-        #     self.mouse_move(SETTINGS.raid_restart)
-        #     self.ahk.click()
-        #     self.mouse_move(SETTINGS.close)
-        #     self.ahk.click()
+        roblox().activate()
 
-        # toggle_auto_raid()
+        def toggle_auto_raid():
+            mouse_move(SETTINGS.button)
+            click()
+            sleep(.2)
+            mouse_move(CENTER)
+            scroll(7)
+            sleep(.5)
+            mouse_move(SETTINGS.raid_restart)
+            click()
+            mouse_move(SETTINGS.close)
+            click()
+
+        toggle_auto_raid()
         sleep(13)
-        # toggle_auto_raid()
-        # sleep(1)
+        toggle_auto_raid()
+        sleep(1)
 
     def set_tower_delay(self, delay: int):
         """
         Set the delay for the tower battle.
         """
+        roblox().activate()
         self.dismiss()
-        self.click(SETTINGS.button)
+        click(SETTINGS.button)
         sleep(0.2)
-        self.mouse_move(CENTER)
-        self.scroll(7)
+        mouse_move(CENTER)
+        scroll(7)
         sleep(0.5)
-        self.click(SETTINGS.inf)
-        self.click(SETTINGS.inf)
-        self.keys(str(delay), interval=0.1)
+        click(SETTINGS.inf)
+        click(SETTINGS.inf)
+        keys(str(delay), interval=0.1)
         # manual close with mouse so keyboard nav involved in close_menu doesn't
         # get stuck in the input field
-        self.click(SETTINGS.close)
+        click(SETTINGS.close)
         sleep(2)
 
     def stop_pots(self):
+        roblox().activate()
         self.set_tower_delay(10)
-        # click leave battle when it appears
+        # body.click leave battle when it appears
         # wait for battle status
         sleep(1.5)
-        self.mouse_move(CENTER)
+        mouse_move(CENTER)
         sleep(0.1)
-        self.until_pixel(BATTLE_STATUS.while_closed, BATTLE_STATUS_COLOR, throw=True)
-        self.click(BATTLE_STATUS.while_closed)
-        self.until_pixel(LEAVE_BATTLE, LEAVE_BATTLE_COLOR, throw=True)
-        self.click(LEAVE_BATTLE)
+        until_pixel(BATTLE_STATUS.while_closed, BATTLE_STATUS_COLOR, throw=True)
+        click(BATTLE_STATUS.while_closed)
+        until_pixel(LEAVE_BATTLE, LEAVE_BATTLE_COLOR, throw=True)
+        click(LEAVE_BATTLE)
         sleep(1.5)
         self.set_tower_delay(1)
         sleep(2)
 
     def set_deck(self, deck: int):
+        roblox().activate()
         self.dismiss()
-        self.click(DECK.button)
+        click(DECK.button)
         coord = [DECK.deck1[0] + DECK.offset * (deck - 1), DECK.deck1[1]]
-        self.click(coord, and_wait=0.5)
+        click(coord, and_wait=0.5)
         self.close_menu()
         sleep(0.5)
 
     def start_boss(self):
-        self.window().activate()
+        roblox().activate()
+        self.respawn()
         self.set_deck(DECK_SLOTS.boss)
-        self.keys("as", 1.1, simultaneous=True)
-        self.keys("a", 0.8, simultaneous=True)
-        self.keys("s", 1.55, simultaneous=True)
-        self.keys("as", 7.35, simultaneous=True)
+        keys("as", 1.1, simultaneous=True)
+        keys("a", 0.8, simultaneous=True)
+        keys("s", 1.55, simultaneous=True)
+        keys("as", 7.35, simultaneous=True)
         self.dismiss()
         sleep(0.5)
-        self.ahk.send("e")
+        key("e")
+        self.try_close_battle()
 
     def start_pots(self):
-        self.window().activate()
+        roblox().activate()
+        self.respawn()
         self.set_deck(DECK_SLOTS.potion)
-        self.keys("sd", 1.1, simultaneous=True)
-        self.key("d", 4.4)
+        keys("sd", 1.1, simultaneous=True)
+        key("d", 4.4)
         sleep(0.5)
-        self.click(START_POTS)
+        click(START_POTS)
         self.close_menu()
-        self.key("a", 1)
+        self.try_close_battle()
+        key("a", 1)
 
     def try_close_battle(self):
         """
         Try to close the battle screen if it is open.
         """
-        self.window().activate()
-        if self.until_pixel(BATTLE_STATUS.while_open, BATTLE_STATUS_COLOR):
+        roblox().activate()
+        if until_pixel(BATTLE_STATUS.while_open, BATTLE_STATUS_COLOR):
             self.close_menu()
 
     def is_connected(self):
-        if not self.pixel_matches(DISCONNECT.left, DISCONNECT.background):
+        if not pixel_matches(DISCONNECT.left, DISCONNECT.background):
             return True
-        if not self.pixel_matches(DISCONNECT.right, DISCONNECT.background):
+        if not pixel_matches(DISCONNECT.right, DISCONNECT.background):
             return True
         return False
 
@@ -258,11 +160,18 @@ class CardClasher:
         """
         Initialize the environment to be ready for automation
         """
+        roblox().activate()
         self.set_tower_delay(1)
-        self.toggle_sprint()
+        self.set_sprint(True)
 
-    def toggle_sprint(self):
-        self.key("Shift", 0.1)
+    def set_sprint(self, sprint: bool):
+        roblox().activate()
+
+        if self._is_sprinting == sprint:
+            return
+
+        key("Shift", 0.1)
+        self._is_sprinting = sprint
 
     def main(self):
         tprint("Hello from [magenta bold]anime-card-clash[/magenta bold]! :)")
@@ -275,7 +184,7 @@ class CardClasher:
         while True:
             if not self.is_connected():
                 tprint("[bold red]Disconnected, reconnecting...[/bold red]")
-                self.click(DISCONNECT.button)
+                click(DISCONNECT.button)
                 sleep(12)
                 self.clean()
                 mode = None
@@ -295,15 +204,11 @@ class CardClasher:
                 elif mode == "pots":
                     self.stop_pots()
 
-                self.respawn()
-
                 # start next
                 if next_mode == "boss":
                     self.start_boss()
                 else:
                     self.start_pots()
-
-                self.try_close_battle()
 
             if loop % 180 == 0:
                 self.dismiss()
