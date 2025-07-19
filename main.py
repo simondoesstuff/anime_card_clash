@@ -38,9 +38,8 @@ DISCONNECT = SimpleNamespace(
 
 
 def tprint(*args, **kwargs):
-    """A wrapper for rich.print that prepends a timestamp."""
-    time_str = f"[{datetime.datetime.now().strftime('%T')}]"
-    print(time_str, *args, **kwargs)
+    time_str = datetime.datetime.now().strftime("%T")
+    print(f"[bold white][{time_str}][/bold white]", *args, **kwargs)
 
 
 def boss_ready():
