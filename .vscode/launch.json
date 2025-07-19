@@ -2,18 +2,20 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "uv: main.py",
+      "name": "uv: src",
       "type": "node-terminal",
       "request": "launch",
-      "command": "uv run main.py",
+      "command": "echo 'all' | uv run src",
       "cwd": "${workspaceFolder}"
     },
     {
-      "name": "uv: test_pixels.py",
+      "name": "uv: test_pixels",
       "type": "node-terminal",
       "request": "launch",
       "command": "uv run -m tests.test_pixels",
-      "cwd": "${workspaceFolder}"
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+      }
     }
   ]
 }
