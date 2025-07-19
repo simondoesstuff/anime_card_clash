@@ -1,16 +1,36 @@
 import datetime
 from time import sleep
-from types import SimpleNamespace
-from typing import Iterable, final
-from rich import print
+from typing import final
 
-from ahk import AHK
-from body import click, key, keys, mouse_move, pixel_matches, roblox, scroll, until_pixel
-from config import *
+
+from body import (
+    click,
+    key,
+    keys,
+    mouse_move,
+    pixel_matches,
+    roblox,
+    scroll,
+    until_pixel,
+)
+from config import (
+    DISMISS,
+    TELEPORT,
+    SETTINGS,
+    CENTER,
+    BATTLE_STATUS,
+    BATTLE_STATUS_COLOR,
+    LEAVE_BATTLE,
+    LEAVE_BATTLE_COLOR,
+    DECK,
+    DECK_SLOTS,
+    START_POTS,
+    DISCONNECT,
+)
 from utils.logging import tprint
 
 
-#TODO: general check for failure and do a top level restart & rejoin
+# TODO: general check for failure and do a top level restart & rejoin
 
 
 def boss_ready():
@@ -58,10 +78,10 @@ class CardClasher:
         def toggle_auto_raid():
             mouse_move(SETTINGS.button)
             click()
-            sleep(.2)
+            sleep(0.2)
             mouse_move(CENTER)
             scroll(7)
-            sleep(.5)
+            sleep(0.5)
             mouse_move(SETTINGS.raid_restart)
             click()
             mouse_move(SETTINGS.close)

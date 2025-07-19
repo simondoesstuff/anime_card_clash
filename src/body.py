@@ -2,7 +2,6 @@ from collections.abc import Iterable
 import datetime
 from time import sleep
 from ahk import AHK
-from rich import print
 
 from config import DISMISS
 from utils.logging import tprint
@@ -23,9 +22,7 @@ def roblox():
     return roblox
 
 
-def mouse_move(
-     coord: tuple[float, float], speed: float = 1, coord_mode="roblox"
-):
+def mouse_move(coord: tuple[float, float], speed: float = 1, coord_mode="roblox"):
     _, _, width, height = roblox().get_position()
     x = coord[0] * width
     y = coord[1] * height
@@ -58,16 +55,12 @@ def until_pixel(coord: tuple[float, float], color: str, throw=False):
     start_time = datetime.datetime.now()
 
     while True:
-        if datetime.datetime.now() - start_time > datetime.timedelta(
-            seconds=timeout
-        ):
+        if datetime.datetime.now() - start_time > datetime.timedelta(seconds=timeout):
             if not throw:
                 tprint(f"Timeout while waiting for {coord} to be {color}")
                 return False
             else:
-                raise TimeoutError(
-                    f"Timeout while waiting for {coord} to be {color}"
-                )
+                raise TimeoutError(f"Timeout while waiting for {coord} to be {color}")
 
         if pixel_matches(coord, color):
             return True
@@ -125,7 +118,7 @@ def click(coord: tuple[float, float] | None = None, double=True, and_wait=0.2):
         mouse_move(coord)
     if and_wait:
         sleep(and_wait)
-        
+
     ahk.click()
 
     if double:
