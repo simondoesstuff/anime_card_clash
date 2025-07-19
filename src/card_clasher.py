@@ -99,13 +99,26 @@ class CardClasher:
         sleep(1.5)
         mouse_move(CENTER)
         sleep(0.1)
-        until_pixel(BATTLE_STATUS.while_closed, BATTLE_STATUS_COLOR, throw=True)
-        click(BATTLE_STATUS.while_closed)
-        until_pixel(LEAVE_BATTLE, LEAVE_BATTLE_COLOR, throw=True)
-        click(LEAVE_BATTLE)
-        sleep(1.5)
-        self.set_tower_delay(1)
-        sleep(2)
+        
+        try:
+            if not until_pixel(BATTLE_STATUS.while_closed, BATTLE_STATUS_COLOR):
+                tprint("[bold red]Can't find the \"open battle\" button[/bold red]")
+                return
+
+            click(BATTLE_STATUS.while_closed)
+
+            if not until_pixel(LEAVE_BATTLE, LEAVE_BATTLE_COLOR):
+                tprint("[bold red]Can't find the \"leave battle\" button[/bold red]")
+                return
+            else:
+                tprint("Leaving battle...")
+
+            click(LEAVE_BATTLE)
+        finally:
+            click(BATTLE_STATUS.while_closed)  # no harm clicking it while not in battle
+            sleep(1.5)
+            self.set_tower_delay(1)
+            sleep(2)
 
     def set_deck(self, deck: int):
         roblox().activate()
@@ -138,14 +151,15 @@ class CardClasher:
         sleep(0.5)
         click(START_POTS)
         self.close_menu()
-        self.try_close_battle()
         key("a", 1)
+        self.try_close_battle()
 
     def try_close_battle(self):
         """
         Try to close the battle screen if it is open.
         """
         roblox().activate()
+
         if until_pixel(BATTLE_STATUS.while_open, BATTLE_STATUS_COLOR):
             self.close_menu()
 

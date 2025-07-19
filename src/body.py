@@ -53,27 +53,25 @@ def pixel_matches(coord: tuple[float, float], color: str):
     return ahk.pixel_get_color(x, y) == color
 
 
-def until_pixel(coord: tuple[float, float], color: str, throw=False):
-    timeout = 10 if not throw else 30
+def until_pixel(coord: tuple[float, float], color: str):
+    """
+    Waits for a coordinate to be a pixel.
+    @returns False on timeout and logs.
+    """
+    timeout = 15
     start_time = datetime.datetime.now()
 
-    while True:
+    while not pixel_matches(coord, color):
         if datetime.datetime.now() - start_time > datetime.timedelta(
             seconds=timeout
         ):
-            if not throw:
-                tprint(f"Timeout while waiting for {coord} to be {color}")
-                return False
-            else:
-                raise TimeoutError(
-                    f"Timeout while waiting for {coord} to be {color}"
-                )
-
-        if pixel_matches(coord, color):
-            return True
+            tprint(f"Timeout while waiting for {coord} to be {color}")
+            return False
 
         click(DISMISS)
         sleep(0.2)
+
+    return True
 
 
 def keys(
