@@ -2,7 +2,6 @@ from collections.abc import Iterable
 import datetime
 from time import sleep
 from ahk import AHK
-from rich import print
 
 from config import DISMISS
 import ocr
@@ -25,9 +24,7 @@ def roblox():
     return roblox
 
 
-def mouse_move(
-     coord: tuple[float, float], speed: float = 1, coord_mode="roblox"
-):
+def mouse_move(coord: tuple[float, float], speed: float = 1, coord_mode="roblox"):
     _, _, width, height = roblox().get_position()
     x = coord[0] * width
     y = coord[1] * height
@@ -35,7 +32,7 @@ def mouse_move(
     
     
 def mouse_pos() -> tuple[float, float]:
-    x, y = ahk.mouse_position()
+    x, y = ahk.mouse_position
     _, _, width, height = roblox().get_position()
     return (x / width, y / height)
 
@@ -147,7 +144,7 @@ def click(coord: tuple[float, float] | None = None, double=True, and_wait=0.2):
         mouse_move(coord)
     if and_wait:
         sleep(and_wait)
-        
+
     ahk.click()
 
     if double:
