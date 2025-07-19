@@ -1,4 +1,4 @@
-from utils.cc import (
+from card_clasher import (
     CardClasher,
     BATTLE_STATUS,
     BATTLE_STATUS_COLOR,
