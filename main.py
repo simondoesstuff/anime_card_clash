@@ -309,7 +309,7 @@ class CardClasher:
                 # stop previous
 
                 if mode is not None:
-                    print(f"[green bold]Stopping {next_mode}[/green bold]")
+                    print(f"[green bold]Stopping {mode}[/green bold]")
 
                 if mode == "boss":
                     self.stop_boss()
