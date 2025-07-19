@@ -37,6 +37,12 @@ DISCONNECT = SimpleNamespace(
 # TODO: general check for failure and do a top level restart & rejoin
 
 
+def tprint(*args, **kwargs):
+    """A wrapper for rich.print that prepends a timestamp."""
+    time_str = f"[{datetime.datetime.now().strftime('%T')}]"
+    print(time_str, *args, **kwargs)
+
+
 def boss_ready():
     hour = datetime.datetime.now().hour
     start = (hour // 3) * 3
@@ -113,7 +119,7 @@ class CardClasher:
                 seconds=timeout
             ):
                 if not throw:
-                    print(f"Timeout while waiting for {coord} to be {color}")
+                    tprint(f"Timeout while waiting for {coord} to be {color}")
                     return False
                 else:
                     raise TimeoutError(
@@ -122,7 +128,7 @@ class CardClasher:
 
             if self.pixel_matches(coord, color):
                 return True
-                
+
             self.dismiss()
             sleep(0.2)
 
@@ -285,8 +291,8 @@ class CardClasher:
         self.key("Shift", 0.1)
 
     def main(self):
-        print("Hello from [magenta bold]anime-card-clash[/magenta bold]! :)")
-        print("[italic]I hope you didn't already press 'shift'[/italic]\n")
+        tprint("Hello from [magenta bold]anime-card-clash[/magenta bold]! :)")
+        tprint("[italic]I hope you didn't already press 'shift'[/italic]\n")
         self.clean()
 
         loop = 0
@@ -294,7 +300,7 @@ class CardClasher:
 
         while True:
             if not self.is_connected():
-                print("[bold red]Disconnected, reconnecting...[/bold red]")
+                tprint("[bold red]Disconnected, reconnecting...[/bold red]")
                 self.click(DISCONNECT.button)
                 sleep(12)
                 self.clean()
@@ -303,12 +309,12 @@ class CardClasher:
             next_mode = "boss" if boss_ready() else "pots"
 
             if mode != next_mode:
-                print(f"[bold green]Starting {next_mode}[/bold green]")
+                tprint(f"[bold green]Starting {next_mode}[/bold green]")
 
                 # stop previous
 
                 if mode is not None:
-                    print(f"[green bold]Stopping {mode}[/green bold]")
+                    tprint(f"[green bold]Stopping {mode}[/green bold]")
 
                 if mode == "boss":
                     self.stop_boss()
@@ -346,4 +352,4 @@ if __name__ == "__main__":
         color = cc.ahk.pixel_get_color(*current_pos)
         _, _, width, height = cc.window().get_position()
         current_pos = (current_pos[0] / width, current_pos[1] / height)
-        print(f"Current position: {current_pos}, Color: {color}")
+        tprint(f"Current position: {current_pos}, Color: {color}")
