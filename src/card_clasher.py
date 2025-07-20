@@ -135,7 +135,7 @@ class CardClasher:
 
             click(LEAVE_BATTLE.pos)
         finally:
-            click(BATTLE_STATUS.while_closed)  # no harm clicking it while not in battle
+            click(BATTLE_STATUS.while_open)  # no harm clicking it while not in battle
             sleep(1.5)
             self.set_tower_delay(1)
             sleep(2)
