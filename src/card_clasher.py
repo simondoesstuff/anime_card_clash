@@ -14,6 +14,7 @@ from body import (
     until_pixel,
     until_text,
 )
+
 from config import (
     BATTLE_STATUS,
     BATTLE_STATUS_COLOR,
@@ -22,6 +23,7 @@ from config import (
     DECK_SLOTS,
     DISCONNECT,
     DISMISS,
+    JOIN_LINK,
     LEAVE_BATTLE,
     SETTINGS,
     START_POTS,
@@ -153,7 +155,7 @@ class CardClasher:
         self.set_deck(DECK_SLOTS.boss)
         keys("as", 1.1, simultaneous=True)
         keys("a", 0.8, simultaneous=True)
-        keys("s", 1.55, simultaneous=True)
+        keys("s", 1.53, simultaneous=True)
         keys("as", 7.35, simultaneous=True)
         self.dismiss()
         sleep(0.5)
@@ -182,7 +184,7 @@ class CardClasher:
             self.close_menu()
         else:
             tprint(
-                "[yellow]Tried to close the battle screen, but maybe it wans't open[/yellow]"
+                "[yellow]Tried to close the battle screen, but maybe it wasn't open[/yellow]"
             )
 
     def is_connected(self):
@@ -270,9 +272,11 @@ class CardClasher:
                         "Rejoining...[/bold red]",
                     )
                     self.rejoin()
-                    sleep(12)
+                    sleep(20)
                     self.clean()
                     mode = None
+                    time_since_success = time()
+                    continue
 
             mode = next_mode
             loop += 1

@@ -36,6 +36,9 @@ class CLI:
     def respawn(self):
         self.cc.respawn()
     
+    def rejoin(self):
+        self.cc.rejoin()
+    
     def pixel_coords(self):
         """For 5 seconds, prints the current mouse position and pixel color."""
         print('...')
