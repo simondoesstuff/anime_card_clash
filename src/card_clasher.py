@@ -209,7 +209,7 @@ class CardClasher:
         if self._is_sprinting == sprint:
             return
 
-        key("Shift", 0.1)
+        key("Shift", 0.3)
         self._is_sprinting = sprint
 
     def rejoin(self):
