@@ -159,7 +159,7 @@ class CardClasher:
         keys("as", 7.35, simultaneous=True)
         self.dismiss()
         sleep(0.5)
-        keys("eeeeeee", 0.3)
+        keys("eeeeeee", interval=0.3)
         self.try_close_battle()
 
     def start_pots(self):
