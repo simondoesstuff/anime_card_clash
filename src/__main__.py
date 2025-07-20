@@ -5,43 +5,42 @@ from card_clasher import CardClasher
 from rich import print
 
 from config import LEAVE_BATTLE
-import ocr
-from utils.types import Rect
 
 
 class CLI:
     """A class dedicated to defining the commands for the CLI."""
+
     def __init__(self):
         self.cc = CardClasher()
 
     def all(self):
         """Start the main functionality"""
         self.cc.main()
-        
+
     def stop_pots(self):
         return self.cc.stop_pots()
-    
+
     def stop_boss(self):
         self.cc.stop_boss()
-        
+
     def start_pots(self):
         self.cc.start_pots()
-        
+
     def start_boss(self):
         self.cc.start_boss()
-        
+
     def clean(self):
         self.cc.clean()
-        
+
     def respawn(self):
         self.cc.respawn()
-    
+
     def rejoin(self):
         self.cc.rejoin()
-    
+
     def pixel_coords(self):
         """For 5 seconds, prints the current mouse position and pixel color."""
-        print('...')
+        print("...")
         time.sleep(1)
 
         for _ in range(5):
@@ -58,9 +57,9 @@ class CLI:
         # This inspects the instance of the class passed to it
         for name, method in inspect.getmembers(self, predicate=inspect.ismethod):
             # Filter out any private/internal methods (starting with '_')
-            if not name.startswith('_'):
+            if not name.startswith("_"):
                 doc = inspect.getdoc(method)
-                summary = doc.split('\n')[0] if doc else "No description available."
+                summary = doc.split("\n")[0] if doc else "No description available."
                 print(f"  {name:<15} {summary}")
         print("  exit, quit         Exits the CLI.\n")
 
@@ -85,18 +84,22 @@ def run_cli_loop(cli_instance):
                 break
 
             # Check if the command exists on the instance and is callable
-            if hasattr(cli_instance, command) and callable(getattr(cli_instance, command)):
+            if hasattr(cli_instance, command) and callable(
+                getattr(cli_instance, command)
+            ):
                 method = getattr(cli_instance, command)
                 # Ensure we don't call private methods
-                if command.startswith('_'):
-                     print(f"Error: '{command}' is not a valid command.")
-                     continue
+                if command.startswith("_"):
+                    print(f"Error: '{command}' is not a valid command.")
+                    continue
                 method(*args)
             else:
                 print(f"Error: Unknown command '{command}'. Type 'help' for options.")
         except TypeError as e:
             # Provides more specific feedback on argument mismatches
-            print(f"Error: Invalid arguments for '{command}'. Please check the command's requirements. Details: {e}")
+            print(
+                f"Error: Invalid arguments for '{command}'. Please check the command's requirements. Details: {e}"
+            )
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
 
