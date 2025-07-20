@@ -75,7 +75,7 @@ class CardClasher:
 
     def close_menu(self):
         roblox().activate()
-        keys(["\\", "Right", "Enter", "\\"], interval=0.2)
+        keys(["\\", "Right", "Enter", "\\"], interval=0.3)
 
     def stop_boss(self):
         roblox().activate()
@@ -159,7 +159,7 @@ class CardClasher:
         keys("as", 7.15, simultaneous=True)
         self.dismiss()
         sleep(0.5)
-        key("e")
+        keys("eeeeeee", interval=0.3)
         self.try_close_battle()
 
     def start_pots(self):
