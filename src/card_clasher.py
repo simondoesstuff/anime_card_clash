@@ -257,7 +257,7 @@ class CardClasher:
                 else:
                     self.start_pots()
 
-            if loop % 180 == 0:
+            if loop % 90 == 0:
                 self.dismiss()
                 # # this is because we're not sure if the server hop happens unless you press w
                 # self.key("Space", duration=0.1)
