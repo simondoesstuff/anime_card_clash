@@ -272,9 +272,11 @@ class CardClasher:
                         "Rejoining...[/bold red]",
                     )
                     self.rejoin()
-                    sleep(12)
+                    sleep(20)
                     self.clean()
                     mode = None
+                    time_since_success = time()
+                    continue
 
             mode = next_mode
             loop += 1
