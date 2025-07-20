@@ -88,7 +88,7 @@ class CardClasher:
             scroll(7)
             sleep(0.5)
             mouse_move(SETTINGS.raid_restart)
-            click()
+            click(double=False)
             mouse_move(SETTINGS.close)
             click()
 
@@ -182,6 +182,8 @@ class CardClasher:
 
         if until_pixel(BATTLE_STATUS.while_open, BATTLE_STATUS_COLOR):
             self.close_menu()
+        else:
+            tprint("[yellow]Tried to close the battle screen, but maybe it wans't open[/yellow]")
 
     def is_connected(self):
         if not pixel_matches(DISCONNECT.left, DISCONNECT.background):
@@ -226,8 +228,6 @@ class CardClasher:
             next_mode = "boss" if boss_ready() else "pots"
 
             if mode != next_mode:
-                tprint(f"[bold green]Starting {next_mode}[/bold green]")
-
                 # stop previous
 
                 if mode is not None:
@@ -239,6 +239,8 @@ class CardClasher:
                     self.stop_pots()
 
                 # start next
+                tprint(f"[bold green]Starting {next_mode}[/bold green]")
+
                 if next_mode == "boss":
                     self.start_boss()
                 else:
