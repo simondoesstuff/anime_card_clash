@@ -1,9 +1,7 @@
 import datetime
-from time import sleep
+import webbrowser
+from time import sleep, time
 from typing import final
-
-from ahk import AHK
-from body import click, key, keys, mouse_move, pixel_matches, roblox, scroll, until_pixel, until_text
 
 from body import (
     click,
@@ -14,22 +12,22 @@ from body import (
     roblox,
     scroll,
     until_pixel,
+    until_text,
 )
 from config import (
-    DISMISS,
-    TELEPORT,
-    SETTINGS,
-    CENTER,
     BATTLE_STATUS,
     BATTLE_STATUS_COLOR,
-    LEAVE_BATTLE,
+    CENTER,
     DECK,
     DECK_SLOTS,
-    START_POTS,
     DISCONNECT,
+    DISMISS,
+    LEAVE_BATTLE,
+    SETTINGS,
+    START_POTS,
+    TELEPORT,
 )
 from utils.logging import tprint
-
 
 # TODO: general check for failure and do a top level restart & rejoin
 
@@ -121,16 +119,16 @@ class CardClasher:
         # body.click leave battle when it appears
         # wait for battle status
         sleep(1.5)
-        
+
         try:
             if not until_pixel(BATTLE_STATUS.while_closed, BATTLE_STATUS_COLOR):
-                tprint("[bold red]Can't find the \"open battle\" button[/bold red]")
+                tprint('[bold red]Can\'t find the "open battle" button[/bold red]')
                 return
 
             click(BATTLE_STATUS.while_closed)
 
             if not until_text(LEAVE_BATTLE, "continue later", timeout=30):
-                tprint("[bold red]Can't find the \"leave battle\" button[/bold red]")
+                tprint('[bold red]Can\'t find the "leave battle" button[/bold red]')
                 return
 
             click(LEAVE_BATTLE.pos)
@@ -183,7 +181,9 @@ class CardClasher:
         if until_pixel(BATTLE_STATUS.while_open, BATTLE_STATUS_COLOR):
             self.close_menu()
         else:
-            tprint("[yellow]Tried to close the battle screen, but maybe it wans't open[/yellow]")
+            tprint(
+                "[yellow]Tried to close the battle screen, but maybe it wans't open[/yellow]"
+            )
 
     def is_connected(self):
         if not pixel_matches(DISCONNECT.left, DISCONNECT.background):
@@ -209,6 +209,14 @@ class CardClasher:
         key("Shift", 0.1)
         self._is_sprinting = sprint
 
+    def rejoin(self):
+        try:
+            webbrowser.open(JOIN_LINK)
+            tprint(f"Attempting to join server: {JOIN_LINK}")
+        except webbrowser.Error as e:
+            tprint(f"[bold red]An error occurred: {e}[/bold red]")
+            raise e
+
     def main(self):
         tprint("Hello from [magenta bold]anime-card-clash[/magenta bold]! :)")
         tprint("[italic]I hope you didn't already press 'shift'[/italic]\n")
@@ -216,6 +224,7 @@ class CardClasher:
 
         loop = 0
         mode = None
+        time_since_success = time()
 
         while True:
             if not self.is_connected():
@@ -250,6 +259,20 @@ class CardClasher:
                 self.dismiss()
                 # # this is because we're not sure if the server hop happens unless you press w
                 # self.key("Space", duration=0.1)
+
+                if pixel_matches(BATTLE_STATUS.while_open, BATTLE_STATUS_COLOR):
+                    time_since_success = time()
+
+                if time() - time_since_success > 300:
+                    tprint(
+                        "[bold red]Out of battle for 5m.",
+                        "Something has gone seriously wrong.",
+                        "Rejoining...[/bold red]",
+                    )
+                    self.rejoin()
+                    sleep(12)
+                    self.clean()
+                    mode = None
 
             mode = next_mode
             loop += 1
