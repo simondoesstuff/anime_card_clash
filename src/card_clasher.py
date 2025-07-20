@@ -209,7 +209,7 @@ class CardClasher:
         if self._is_sprinting == sprint:
             return
 
-        key("Shift", 0.1)
+        key("Shift", 0.3)
         self._is_sprinting = sprint
 
     def rejoin(self):
@@ -261,21 +261,21 @@ class CardClasher:
             if loop % 75 == 0:
                 self.dismiss()
 
-                if pixel_matches(BATTLE_STATUS.while_open, BATTLE_STATUS_COLOR):
-                    time_since_success = time()
+            if pixel_matches(BATTLE_STATUS.while_closed, BATTLE_STATUS_COLOR):
+                time_since_success = time()
 
-                if time() - time_since_success >= 300:
-                    tprint(
-                        "[bold red]Out of battle for 5m. "
-                        + "Something has gone seriously wrong. "
-                        + "Rejoining...[/bold red]"
-                    )
-                    self.rejoin()
-                    sleep(20)
-                    self.clean()
-                    mode = None
-                    time_since_success = time()
-                    continue
+            if time() - time_since_success >= 300:
+                tprint(
+                    "[bold red]Out of battle for 5m. "
+                    + "Something has gone seriously wrong. "
+                    + "Rejoining...[/bold red]"
+                )
+                self.rejoin()
+                sleep(20)
+                self.clean()
+                mode = None
+                time_since_success = time()
+                continue
 
             mode = next_mode
             loop += 1
