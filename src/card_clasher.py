@@ -198,6 +198,7 @@ class CardClasher:
         """
         Initialize the environment to be ready for automation
         """
+        self.__init__()
         roblox().activate()
         self.set_tower_delay(1)
         self.set_sprint(True)
@@ -257,19 +258,17 @@ class CardClasher:
                 else:
                     self.start_pots()
 
-            if loop % 90 == 0:
+            if loop % 75 == 0:
                 self.dismiss()
-                # # this is because we're not sure if the server hop happens unless you press w
-                # self.key("Space", duration=0.1)
 
                 if pixel_matches(BATTLE_STATUS.while_open, BATTLE_STATUS_COLOR):
                     time_since_success = time()
 
-                if time() - time_since_success > 300:
+                if time() - time_since_success >= 300:
                     tprint(
-                        "[bold red]Out of battle for 5m."+
-                        "Something has gone seriously wrong."+
-                        "Rejoining...[/bold red]"
+                        "[bold red]Out of battle for 5m. "
+                        + "Something has gone seriously wrong. "
+                        + "Rejoining...[/bold red]"
                     )
                     self.rejoin()
                     sleep(20)
