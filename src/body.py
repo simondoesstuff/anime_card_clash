@@ -29,8 +29,8 @@ def mouse_move(coord: tuple[float, float], speed: float = 1, coord_mode="roblox"
     x = coord[0] * width
     y = coord[1] * height
     ahk.mouse_move(x, y, speed=speed * _mouse_speed, coord_mode=coord_mode)
-    
-    
+
+
 def mouse_pos() -> tuple[float, float]:
     x, y = ahk.mouse_position
     _, _, width, height = roblox().get_position()
@@ -67,27 +67,26 @@ def until_pixel(coord: tuple[float, float], color: str, timeout: float = 15):
     mouse_move(DISMISS)
 
     while not pixel_matches(coord, color):
-        if datetime.datetime.now() - start_time > datetime.timedelta(
-            seconds=timeout
-        ):
-            tprint(f"Timeout while waiting for {coord} to be {color}")
+        if datetime.datetime.now() - start_time > datetime.timedelta(seconds=timeout):
             return False
 
         click()
         sleep(0.2)
 
     return True
-    
-    
-def until_text(region: Rect, text: str, timeout: int = 15, window_title: str = "Roblox"):
+
+
+def until_text(
+    region: Rect, text: str, timeout: int = 15, window_title: str = "Roblox"
+):
     start_time = datetime.datetime.now()
     mouse_move(DISMISS)
-    
+
     while not ocr.try_text(region, text, window_title):
         if datetime.datetime.now() - start_time > datetime.timedelta(seconds=timeout):
             tprint(f"Timeout while waiting for text '{text}' in region {region}")
             return False
-        
+
         click()
         sleep(0.2)
 

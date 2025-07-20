@@ -174,17 +174,21 @@ class CardClasher:
         key("a", 1)
         self.try_close_battle()
 
-    def try_close_battle(self):
+    def try_close_battle(self, instant: bool = False):
         """
         Try to close the battle screen if it is open.
         """
         roblox().activate()
 
-        if until_pixel(BATTLE_STATUS.while_open, BATTLE_STATUS_COLOR):
+        if until_pixel(
+            BATTLE_STATUS.while_open,
+            BATTLE_STATUS_COLOR,
+            timeout=15 if not instant else 1,
+        ):
             self.close_menu()
         else:
             tprint(
-                "[yellow]Tried to close the battle screen, but maybe it wasn't open[/yellow]"
+                "[yellow]Tried (and [bold red]failed[/bold red]) to close the battle screen, but it wasn't open or something [bold]GG[/bold][/yellow]"
             )
 
     def is_connected(self):
@@ -263,6 +267,12 @@ class CardClasher:
 
             if pixel_matches(BATTLE_STATUS.while_closed, BATTLE_STATUS_COLOR):
                 time_since_success = time()
+            elif pixel_matches(BATTLE_STATUS.while_open, BATTLE_STATUS_COLOR):
+                tprint(
+                    "[bold red]Battle status is detected stuck "
+                    + "open, will try to close[/bold red]"
+                )
+                self.try_close_battle(instant=True)
 
             if time() - time_since_success >= 300:
                 tprint(
