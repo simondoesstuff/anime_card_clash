@@ -9,6 +9,13 @@
       "cwd": "${workspaceFolder}"
     },
     {
+      "name": "uv: cli",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "uv run src",
+      "cwd": "${workspaceFolder}"
+    },
+    {
       "name": "uv: test_pixels",
       "type": "node-terminal",
       "request": "launch",

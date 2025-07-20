@@ -3,8 +3,6 @@ from time import sleep
 from typing import final
 
 from ahk import AHK
-from body import click, key, keys, mouse_move, pixel_matches, roblox, scroll, until_pixel, until_text
-
 from body import (
     click,
     key,
@@ -14,7 +12,9 @@ from body import (
     roblox,
     scroll,
     until_pixel,
+    until_text,
 )
+
 from config import (
     DISMISS,
     TELEPORT,
@@ -121,16 +121,16 @@ class CardClasher:
         # body.click leave battle when it appears
         # wait for battle status
         sleep(1.5)
-        
+
         try:
             if not until_pixel(BATTLE_STATUS.while_closed, BATTLE_STATUS_COLOR):
-                tprint("[bold red]Can't find the \"open battle\" button[/bold red]")
+                tprint('[bold red]Can\'t find the "open battle" button[/bold red]')
                 return
 
             click(BATTLE_STATUS.while_closed)
 
             if not until_text(LEAVE_BATTLE, "continue later", timeout=30):
-                tprint("[bold red]Can't find the \"leave battle\" button[/bold red]")
+                tprint('[bold red]Can\'t find the "leave battle" button[/bold red]')
                 return
 
             click(LEAVE_BATTLE.pos)
@@ -155,7 +155,7 @@ class CardClasher:
         self.set_deck(DECK_SLOTS.boss)
         keys("as", 1.1, simultaneous=True)
         keys("a", 0.8, simultaneous=True)
-        keys("s", 1.55, simultaneous=True)
+        keys("s", 1.53, simultaneous=True)
         keys("as", 7.35, simultaneous=True)
         self.dismiss()
         sleep(0.5)
@@ -183,7 +183,9 @@ class CardClasher:
         if until_pixel(BATTLE_STATUS.while_open, BATTLE_STATUS_COLOR):
             self.close_menu()
         else:
-            tprint("[yellow]Tried to close the battle screen, but maybe it wans't open[/yellow]")
+            tprint(
+                "[yellow]Tried to close the battle screen, but maybe it wasn't open[/yellow]"
+            )
 
     def is_connected(self):
         if not pixel_matches(DISCONNECT.left, DISCONNECT.background):
