@@ -267,9 +267,9 @@ class CardClasher:
 
                 if time() - time_since_success > 300:
                     tprint(
-                        "[bold red]Out of battle for 5m.",
-                        "Something has gone seriously wrong.",
-                        "Rejoining...[/bold red]",
+                        "[bold red]Out of battle for 5m."+
+                        "Something has gone seriously wrong."+
+                        "Rejoining...[/bold red]"
                     )
                     self.rejoin()
                     sleep(20)
