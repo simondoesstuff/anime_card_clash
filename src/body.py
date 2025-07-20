@@ -58,12 +58,11 @@ def pixel_matches(coord: tuple[float, float], color: str):
     return ahk.pixel_get_color(x, y) == color
 
 
-def until_pixel(coord: tuple[float, float], color: str):
+def until_pixel(coord: tuple[float, float], color: str, timeout: float = 15):
     """
     Waits for a coordinate to be a pixel.
     @returns False on timeout and logs.
     """
-    timeout = 15
     start_time = datetime.datetime.now()
     mouse_move(DISMISS)
 
