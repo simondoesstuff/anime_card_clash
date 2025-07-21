@@ -156,7 +156,7 @@ class CardClasher:
         keys("as", 1.1, simultaneous=True)
         keys("a", 0.8, simultaneous=True)
         keys("s", 1.53, simultaneous=True)
-        keys("as", 7.15, simultaneous=True)
+        keys("as", 7.35, simultaneous=True)
         self.dismiss()
         sleep(0.5)
         keys("eeeeeee", interval=0.3)
