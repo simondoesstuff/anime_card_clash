@@ -34,7 +34,7 @@ from utils.types import Rect
 pdi.FAILSAFE = True
 
 
-def roblox() -> gw.Window:
+def roblox(activate=True) -> gw.Window:
     """
     Finds and returns the active Roblox window object.
     
@@ -44,13 +44,26 @@ def roblox() -> gw.Window:
     Returns:
         The first window object found with the title "Roblox".
     """
-    try:
-        roblox_windows = gw.getWindowsWithTitle("Roblox")
-        if not roblox_windows:
-            raise ValueError("Cannot find Roblox window.")
-        return roblox_windows[0]
-    except gw.PyGetWindowException:
-        raise ValueError("Cannot find Roblox window.")
+    # try 5 times
+    # there seems to be a rare race condition between the time windows provides
+    # the window handle and when we activate() it that results in a err 6 (stale window).
+    for _ in range(5):
+        try:
+            roblox_windows = gw.getWindowsWithTitle("Roblox")
+
+            if not roblox_windows:
+                raise ValueError("Cannot find Roblox window.")
+
+            win = roblox_windows[0]
+
+            if activate:
+                win.activate()
+
+            return win
+        except gw.PyGetWindowException:
+            continue
+
+    raise ValueError("Cannot find Roblox window.")
 
 
 def mouse_move(coord: tuple[float, float], speed: float = 2.5):
@@ -81,8 +94,7 @@ def get_mouse_pos() -> tuple[float, float]:
     Returns:
         A tuple (x, y) of the mouse's relative coordinates (0.0 to 1.0),
     """
-    win = roblox() # Assumes roblox() function from previous script exists
-    win.activate()
+    win = roblox(activate=False) # Assumes roblox() function from previous script exists
     win_x, win_y, width, height = win.box
 
     # Get absolute screen coordinates
@@ -108,7 +120,7 @@ def get_pixel_color(coord: tuple[float, float]) -> str | None:
         or None if the window or pixel cannot be read.
     """
     try:
-        win = roblox() # Assumes roblox() function from previous script exists
+        win = roblox(activate=False) # Assumes roblox() function from previous script exists
         win_x, win_y, width, height = win.box
 
         # Convert normalized coordinates to absolute screen coordinates
@@ -135,7 +147,7 @@ def scroll(amount: int):
     Args:
         amount: The number of "clicks" to scroll. Positive scrolls down, negative scrolls up.
     """
-    roblox().activate()
+    roblox()
     # pydirectinput: positive value scrolls UP, negative scrolls DOWN.
     # We invert the amount to match the intuitive logic (positive = down).
     pdi.scroll(-amount)
@@ -152,7 +164,7 @@ def pixel_matches(coord: tuple[float, float], color: str) -> bool:
     Returns:
         True if the pixel color matches, False otherwise.
     """
-    win = roblox()
+    win = roblox(activate=False)
     win_x, win_y, width, height = win.box
 
     abs_x = win_x + (coord[0] * width)
@@ -228,7 +240,7 @@ def keys(
         interval: Time in seconds to wait between key presses.
         simultaneous: If True, press all keys down together, hold, then release.
     """
-    roblox().activate()
+    roblox()
 
     if simultaneous:
         for key in keys_to_press:
@@ -268,7 +280,7 @@ def click(coord: tuple[float, float] | None = None, double: bool = True, and_wai
         double: If True, performs a double click.
         and_wait: Time in seconds to wait before the click.
     """
-    roblox().activate()
+    roblox()
 
     if coord is not None:
         mouse_move(coord)

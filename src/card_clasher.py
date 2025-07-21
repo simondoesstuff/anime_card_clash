@@ -4,12 +4,12 @@ from time import sleep, time
 from typing import final
 
 from body import (
+    roblox,
     click,
     key,
     keys,
     mouse_move,
     pixel_matches,
-    roblox,
     scroll,
     until_pixel,
     until_text,
@@ -48,14 +48,14 @@ class CardClasher:
         self._is_sprinting = False
 
     def dismiss(self):
-        roblox().activate()
+        roblox()
         click(DISMISS)
 
     def respawn(self):
         """
         teleport to ninja and back to lobby to reset position
         """
-        roblox().activate()
+        roblox()
         click(TELEPORT.button)
 
         if not until_text(TELEPORT.menu_text, "teleport"):
@@ -74,11 +74,11 @@ class CardClasher:
         sleep(1.5)
 
     def close_menu(self):
-        roblox().activate()
+        roblox()
         keys(["\\", "Right", "Enter", "\\"], interval=0.3)
 
     def stop_boss(self):
-        roblox().activate()
+        roblox()
 
         def toggle_auto_raid():
             mouse_move(SETTINGS.button)
@@ -101,7 +101,7 @@ class CardClasher:
         """
         Set the delay for the tower battle.
         """
-        roblox().activate()
+        roblox()
         self.dismiss()
         click(SETTINGS.button)
         sleep(0.2)
@@ -116,7 +116,7 @@ class CardClasher:
         click(SETTINGS.close)
 
     def stop_pots(self):
-        roblox().activate()
+        roblox()
         self.set_tower_delay(10)
         # body.click leave battle when it appears
         # wait for battle status
@@ -141,7 +141,7 @@ class CardClasher:
             sleep(2)
 
     def set_deck(self, deck: int):
-        roblox().activate()
+        roblox()
         self.dismiss()
         click(DECK.button)
         coord = (DECK.deck1[0] + DECK.offset * (deck - 1), DECK.deck1[1])
@@ -150,7 +150,7 @@ class CardClasher:
         sleep(0.5)
 
     def start_boss(self):
-        roblox().activate()
+        roblox()
         self.respawn()
         self.set_deck(DECK_SLOTS.boss)
         keys("as", 1.1, simultaneous=True)
@@ -165,7 +165,7 @@ class CardClasher:
         self.try_close_battle()
 
     def start_pots(self):
-        roblox().activate()
+        roblox()
         self.respawn()
         self.set_deck(DECK_SLOTS.potion)
         keys("sd", 1.1, simultaneous=True)
@@ -180,7 +180,7 @@ class CardClasher:
         """
         Try to close the battle screen if it is open.
         """
-        roblox().activate()
+        roblox()
 
         if until_pixel(
             BATTLE_STATUS.while_open,
@@ -205,12 +205,12 @@ class CardClasher:
         Initialize the environment to be ready for automation
         """
         self.__init__()
-        roblox().activate()
+        roblox()
         self.set_tower_delay(1)
         self.set_sprint(True)
 
     def set_sprint(self, sprint: bool):
-        roblox().activate()
+        roblox()
 
         if self._is_sprinting == sprint:
             return
