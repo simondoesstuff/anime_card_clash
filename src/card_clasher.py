@@ -273,6 +273,7 @@ class CardClasher:
                     + "open, will try to close[/bold red]"
                 )
                 self.try_close_battle(instant=True)
+                key("\\")
 
             if time() - time_since_success >= 300:
                 tprint(
