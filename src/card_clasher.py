@@ -158,7 +158,7 @@ class CardClasher:
         keys("s", 1.53, simultaneous=True)
         keys("as", 7.35, simultaneous=True)
         # to put the boss in better view
-        keys("sd", .2, simultaneous=True)
+        keys("sd", 0.2, simultaneous=True)
         self.dismiss()
         sleep(0.5)
         keys("eeeeeee", interval=0.3)
@@ -266,6 +266,14 @@ class CardClasher:
 
             if loop % 75 == 0:
                 self.dismiss()
+
+            if pixel_matches(
+                (0.7859375, 0.053703703703703705), "0xFFFFFF"
+            ) or pixel_matches((0.9713541666666666, 0.040740740740740744), "0xFFFFFF"):
+                tprint(
+                    "[bold red]UI Nav mode detected stuck on, toggling off...[/bold red]"
+                )
+                key("\\")
 
             if pixel_matches(BATTLE_STATUS.while_closed, BATTLE_STATUS_COLOR):
                 time_since_success = time()
