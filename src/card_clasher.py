@@ -267,6 +267,7 @@ class CardClasher:
             if loop % 75 == 0:
                 self.dismiss()
 
+            # TODO: make this a config option
             if pixel_matches(
                 (0.7859375, 0.053703703703703705), "0xFFFFFF"
             ) or pixel_matches((0.9713541666666666, 0.040740740740740744), "0xFFFFFF"):

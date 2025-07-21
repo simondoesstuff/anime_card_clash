@@ -3,28 +3,15 @@ revision = 2
 requires-python = "==3.12.*"
 
 [[package]]
-name = "ahk"
-version = "1.8.4"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "jinja2" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/87/80/0ecedbb6dfa2540b9aeda5ff07a3e4274339a4707aa36af16a8e2a86308d/ahk-1.8.4.tar.gz", hash = "sha256:675f864a7818361925592dc876fe7ac046d18eafef72a9ce7b2c19179b8d96ab", size = 133742, upload-time = "2025-04-02T19:46:48.193Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/aa/9f/4455c53091281eb36b70acaca4d6e2944be6624900916b97038f5cff1457/ahk-1.8.4-py3-none-any.whl", hash = "sha256:4f31b77f94a6156302c3d155fad52f010e4e7eeaa7148606d1415a1f98f3a739", size = 124871, upload-time = "2025-04-02T19:46:46.843Z" },
-]
-
-[[package]]
 name = "anime-card-clasher"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "ahk" },
     { name = "easyocr" },
     { name = "mss" },
     { name = "numpy" },
     { name = "pyautogui" },
-    { name = "pydirectinput" },
+    { name = "pydirectinput-rgx" },
     { name = "pygetwindow" },
     { name = "rich" },
     { name = "torch" },
@@ -34,12 +21,11 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "ahk", specifier = ">=1.8.4" },
     { name = "easyocr" },
     { name = "mss", specifier = ">=10.0.0" },
     { name = "numpy" },
     { name = "pyautogui" },
-    { name = "pydirectinput" },
+    { name = "pydirectinput-rgx", specifier = ">=2.1.2" },
     { name = "pygetwindow" },
     { name = "rich", specifier = ">=14.0.0" },
     { name = "torch", index = "https://download.pytorch.org/whl/cu121" },
@@ -409,12 +395,12 @@ wheels = [
 ]
 
 [[package]]
-name = "pydirectinput"
-version = "1.0.4"
+name = "pydirectinput-rgx"
+version = "2.1.2"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/5f/c0/cbcc5f1653d956ee2109b604747b7eaf37d59e50b41cc9dedabedf70aec6/PyDirectInput-1.0.4.tar.gz", hash = "sha256:bebe65102c69208688402f9f4cbd2ae7afc174fd2123e156e178b1304e7f80a2", size = 7486, upload-time = "2021-02-02T22:23:30.859Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0f/ab/482564b28e7c208024b258699b9ab2f4a05346f3d6d51ed376ced7442be3/pydirectinput_rgx-2.1.2.tar.gz", hash = "sha256:53796415071fbe784f0db084ead9363e99d59c9f958a656e30b42f0eb91010f6", size = 39705, upload-time = "2024-10-08T09:15:02.541Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c9/8e/f909defe798270afc2241d3a8986d51459e70c37f02d2ba549627b781b2c/PyDirectInput-1.0.4-py3-none-any.whl", hash = "sha256:238bbe97f505f9c8728a47ea6a787750dbe834ec1fb42b98b3d703d827eda83e", size = 8879, upload-time = "2021-02-02T22:23:28.115Z" },
+    { url = "https://files.pythonhosted.org/packages/90/49/6a2280dd4856658c74f35ce8061a6c9b5ad893ae006610e0c5c9a70ed724/pydirectinput_rgx-2.1.2-py3-none-any.whl", hash = "sha256:06842ecdc479055b94282f2201a43230af34c16a1801215b3064ae0efbe7daeb", size = 36035, upload-time = "2024-10-08T09:15:00.681Z" },
 ]
 
 [[package]]

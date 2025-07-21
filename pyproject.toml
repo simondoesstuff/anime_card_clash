@@ -7,15 +7,14 @@ requires-python = "==3.12.*"
 dependencies = [
     "easyocr",
     "pyautogui",
-    "pydirectinput",
     "pygetwindow",
     "numpy",
     "torch",
     "torchvision",
     "torchaudio",
-    "ahk>=1.8.4",
     "rich>=14.0.0",
     "mss>=10.0.0",
+    "pydirectinput-rgx>=2.1.2",
 ]
 
 # Tell uv about the special PyTorch download server

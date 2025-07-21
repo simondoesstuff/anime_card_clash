@@ -44,10 +44,8 @@ class CLI:
         time.sleep(1)
 
         for _ in range(5):
-            current_pos = body.ahk.mouse_position
-            color = body.ahk.pixel_get_color(*current_pos)
-            _, _, width, height = body.roblox().get_position()
-            current_pos = (current_pos[0] / width, current_pos[1] / height)
+            current_pos = body.get_mouse_pos()
+            color = body.get_pixel_color(current_pos)
             print(f"Position: {current_pos}, Color: {color}")
             time.sleep(1)
 
@@ -70,19 +68,19 @@ def run_cli_loop(cli_instance):
     """
     print("Welcome to the CLI. Type 'help' for a list of commands or 'exit' to quit.")
     while True:
+        inp = input(">> ").strip()
+        if not inp:
+            continue
+
+        parts = inp.split()
+        command = parts[0].lower()
+        args = parts[1:]
+
+        if command in ["exit", "quit"]:
+            print("Exiting CLI.")
+            break
+
         try:
-            inp = input(">> ").strip()
-            if not inp:
-                continue
-
-            parts = inp.split()
-            command = parts[0].lower()
-            args = parts[1:]
-
-            if command in ["exit", "quit"]:
-                print("Exiting CLI.")
-                break
-
             # Check if the command exists on the instance and is callable
             if hasattr(cli_instance, command) and callable(
                 getattr(cli_instance, command)
@@ -102,6 +100,7 @@ def run_cli_loop(cli_instance):
             )
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
+            raise e
 
 
 def main():
@@ -110,11 +109,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    # cc = CardClasher()
-    # while True:
-    #     # get pixel color at current
-    #     current_pos = cc.ahk.mouse_position
-    #     color = cc.ahk.pixel_get_color(*current_pos)
-    #     _, _, width, height = cc.window().get_position()
-    #     current_pos = (current_pos[0] / width, current_pos[1] / height)
-    #     tprint(f"Current position: {current_pos}, Color: {color}")
