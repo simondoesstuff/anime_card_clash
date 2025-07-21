@@ -157,6 +157,8 @@ class CardClasher:
         keys("a", 0.8, simultaneous=True)
         keys("s", 1.53, simultaneous=True)
         keys("as", 7.35, simultaneous=True)
+        # to put the boss in better view
+        keys("sd", .2, simultaneous=True)
         self.dismiss()
         sleep(0.5)
         keys("eeeeeee", interval=0.3)
