@@ -20,8 +20,8 @@ BATTLE_STATUS_COLOR = "0xFFFFFF"
 LEAVE_BATTLE = Rect((0.39, 0.34), (0.1, 0.05))
 TELEPORT = SimpleNamespace(
     button=(0.09, 0.5),
-    ninja=(0.64, 0.36),
     lobby=(0.64, 0.27),
+    offset=.1,
     menu_text=Rect((0.35, 0.13), (0.12, 0.05)),
 )
 START_POTS = (0.54, 0.47)

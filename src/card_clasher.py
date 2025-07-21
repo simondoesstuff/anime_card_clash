@@ -51,9 +51,10 @@ class CardClasher:
         roblox()
         click(DISMISS)
 
-    def respawn(self):
+    def respawn(self, key=1):
         """
-        teleport to ninja and back to lobby to reset position
+        teleport to another location and back to lobby to reset position
+        @param key: specifies the key of the alternate location (it always does lobby)
         """
         roblox()
         click(TELEPORT.button)
@@ -62,7 +63,10 @@ class CardClasher:
             tprint("[red bold]Couldn't open the teleport menu[/red bold]")
             return
 
-        click(TELEPORT.ninja)
+        lobby = TELEPORT.lobby
+        keyed_item = ( lobby[0], lobby[1] + TELEPORT.offset * key )
+
+        click(keyed_item)
         sleep(1.5)
         click(TELEPORT.button)
 
@@ -70,7 +74,7 @@ class CardClasher:
             tprint("[red bold]Couldn't open the teleport menu[/red bold]")
             return
 
-        click(TELEPORT.lobby)
+        click(lobby)
         sleep(1.5)
 
     def close_menu(self):
@@ -153,28 +157,21 @@ class CardClasher:
         roblox()
         self.respawn()
         self.set_deck(DECK_SLOTS.boss)
-        keys("as", 1.1, simultaneous=True)
-        keys("a", 0.8, simultaneous=True)
-        keys("s", 1.53, simultaneous=True)
-        keys("as", 7.35, simultaneous=True)
-        # to put the boss in better view
-        keys("sd", 0.2, simultaneous=True)
+        key('w', 9.8)
         self.dismiss()
         sleep(0.5)
         keys("eeeeeee", interval=0.3)
-        self.try_close_battle()
 
     def start_pots(self):
         roblox()
-        self.respawn()
+        self.respawn(key=3)
         self.set_deck(DECK_SLOTS.potion)
-        keys("sd", 1.1, simultaneous=True)
-        key("d", 4.4)
+        key("d", .95)
+        key("w", 4.5)
         sleep(0.5)
         click(START_POTS)
         self.close_menu()
-        key("a", 1)
-        self.try_close_battle()
+        key("s", .7)
 
     def try_close_battle(self, instant: bool = False):
         """
@@ -206,6 +203,8 @@ class CardClasher:
         """
         self.__init__()
         roblox()
+        key("i", duration=1.5)
+        key("o", duration=1.5)
         self.set_tower_delay(1)
         self.set_sprint(True)
 
