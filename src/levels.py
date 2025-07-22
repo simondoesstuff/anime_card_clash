@@ -66,7 +66,7 @@ def interpret_instruction(instruction: str):
 
 def start_eminence(cc: CardClasher):
     # TODO: implement a general teleport
-    roblox().activate()
+    roblox()
     interpret_instruction("1.25> 1.9w .7wd 1w 1.1wa 1.7w")
     click(FIGHT)
     

@@ -245,12 +245,12 @@ class CardClasher:
             read = reads[0]
             center = np.array(read[1]).sum(axis=0) / 4
             # normalize for window shape
-            win = roblox(activate=False)
-            center /= np.array([win.width, win.height])
+            _, _, win_width, win_height = roblox(activate=False)
+            center /= np.array([win_width, win_height])
             # adjust based on the diff
             diff = target_pos - center
             # convert delta into time
-            aspect_ratio = win.height / win.width
+            aspect_ratio = win_height / win_width
             diff *= np.array([step_ratio, step_ratio * aspect_ratio])
 
             # execute adjustment

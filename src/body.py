@@ -1,69 +1,38 @@
-import pydirectinput as pdi
-import pyautogui
-from collections.abc import Iterable
 import datetime
+from collections.abc import Iterable
 from time import sleep
-import pygetwindow as gw
 
-from config import DISMISS
+from ahk import AHK
+
 import ocr
+from config import DISMISS
 from utils.logging import tprint
 from utils.types import Rect
 
-# --- Notes on the Transition from AHK to PyDirectInput ---
-#
-# 1. Dependency Change: This script now uses `pydirectinput-rgx` for all keyboard and mouse inputs
-#    and `pyautogui` for reading pixel colors.
-#    Please install them:
-#    pip install pydirectinput-rgx
-#    pip install pyautogui
-#
-# 2. Coordinate System: PyDirectInput uses absolute screen coordinates. All functions that accept
-#    relative coordinates (e.g., 0.5 for center) now convert them to absolute screen coordinates
-#    based on the Roblox window's current position and size.
-#
-# 3. Pixel Matching: AHK's `PixelGetColor` returns a BGR hex string (e.g., 0xFF0000 is Blue).
-#    PyAutoGUI's `pixel()` returns an RGB tuple. The `pixel_matches` function now handles this
-#    conversion, so you can continue to use your existing BGR hex color strings.
-#
-# 4. Speed vs. Duration: AHK's `speed` parameter (0-100) is replaced by PyDirectInput's `duration`
-#    parameter (in seconds). The functions `mouse_move` and `mouse_right_drag` now interpret the
-#    old `speed` value to calculate a suitable duration.
-
-# Set a fail-safe to prevent the mouse from being stuck at a screen corner.
-pdi.FAILSAFE = True
+# Initialize the AHK interface
+ahk = AHK(executable_path="./AutoHotkey/AutoHotkeyU32.exe")
+_mouse_speed: float = 2.5
 
 
-def roblox(activate=True) -> gw.Window:
+def roblox(activate=True) -> tuple[int, int, int, int]:
     """
-    Finds and returns the active Roblox window object.
-    
+    Finds the Roblox window, activates it, and returns its size.
+
     Raises:
         ValueError: If the Roblox window cannot be found.
-        
+
     Returns:
-        The first window object found with the title "Roblox".
+        A tuple (x, y, width, height) of the window in pixels.
     """
-    # try 5 times
-    # there seems to be a rare race condition between the time windows provides
-    # the window handle and when we activate() it that results in a err 6 (stale window).
-    for _ in range(5):
-        try:
-            roblox_windows = gw.getWindowsWithTitle("Roblox")
+    roblox_win = ahk.find_window(title="Roblox")
 
-            if not roblox_windows:
-                raise ValueError("Cannot find Roblox window.")
+    if not roblox_win:
+        raise ValueError("Can't find Roblox window")
 
-            win = roblox_windows[0]
+    if activate:
+        roblox_win.activate()
 
-            if activate:
-                win.activate()
-
-            return win
-        except gw.PyGetWindowException:
-            continue
-
-    raise ValueError("Cannot find Roblox window.")
+    return roblox_win.get_position() # x, y, w, h
 
 
 def mouse_move(coord: tuple[float, float], speed: float = 2.5):
@@ -72,19 +41,17 @@ def mouse_move(coord: tuple[float, float], speed: float = 2.5):
 
     Args:
         coord: A tuple (x, y) with relative coordinates (0.0 to 1.0).
-        speed: A multiplier for movement speed. Higher is faster.
+        speed: A value from 0 (fast) to 100 (slow) for movement speed.
     """
-    win = roblox()
-    win_x, win_y, width, height = win.box
+    # Get window dimensions directly from the new roblox() function
+    _, _, width, height = roblox(activate=False)
 
-    # Convert relative coordinates to absolute screen coordinates
-    abs_x = win_x + (coord[0] * width)
-    abs_y = win_y + (coord[1] * height)
+    # Convert relative coordinates to absolute coordinates within the window
+    x = coord[0] * width
+    y = coord[1] * height
 
-    # Convert speed to a duration for pydirectinput. A higher speed means a lower duration.
-    # This conversion can be tuned for desired "feel".
-    duration = 0.4 / speed
-    pdi.moveTo(int(abs_x), int(abs_y), duration=duration)
+    # Assumes the AHK script is set to use Window Coordinate Mode
+    ahk.mouse_move(x, y, speed=int(speed), coord_mode="Window")
 
 
 def get_mouse_pos() -> tuple[float, float]:
@@ -92,16 +59,15 @@ def get_mouse_pos() -> tuple[float, float]:
     Gets the current mouse position as normalized coordinates relative to the Roblox window.
 
     Returns:
-        A tuple (x, y) of the mouse's relative coordinates (0.0 to 1.0),
+        A tuple (x, y) of the mouse's relative coordinates (0.0 to 1.0).
     """
-    win = roblox(activate=False) # Assumes roblox() function from previous script exists
-    win_x, win_y, width, height = win.box
+    # Get window position and dimensions directly
+    win_x, win_y, width, height = roblox(activate=False)
 
-    # Get absolute screen coordinates
-    abs_x, abs_y = pyautogui.position()
+    # Get absolute screen coordinates of the mouse
+    abs_x, abs_y = ahk.mouse_position
 
-    # Convert absolute coordinates to be relative to the window
-    # Clamping the values between 0 and 1 handles cases where the mouse is outside the window
+    # Convert absolute screen coordinates to be relative to the window, clamped between 0 and 1
     rel_x = max(0.0, min(1.0, (abs_x - win_x) / width))
     rel_y = max(0.0, min(1.0, (abs_y - win_y) / height))
 
@@ -116,26 +82,20 @@ def get_pixel_color(coord: tuple[float, float]) -> str | None:
         coord: A tuple (x, y) with normalized coordinates (0.0 to 1.0).
 
     Returns:
-        The BGR hex color string (e.g., "0xFF0000" for blue),
-        or None if the window or pixel cannot be read.
+        The BGR hex color string (e.g., "0xFF0000" for blue), or None on error.
     """
     try:
-        win = roblox(activate=False) # Assumes roblox() function from previous script exists
-        win_x, win_y, width, height = win.box
+        # Get window position and dimensions directly
+        win_x, win_y, width, height = roblox(activate=False)
 
         # Convert normalized coordinates to absolute screen coordinates
         abs_x = win_x + (coord[0] * width)
         abs_y = win_y + (coord[1] * height)
 
-        # pyautogui.pixel() returns an (R, G, B) tuple.
-        r, g, b = pyautogui.pixel(int(abs_x), int(abs_y))
+        # AHK's pixel_get_color uses screen coordinates by default and returns BGR format
+        return ahk.pixel_get_color(int(abs_x), int(abs_y), coord_mode="Screen")
 
-        # Convert RGB to a BGR hex string to match AutoHotKey's format for consistency.
-        pixel_color_bgr_hex = f"0x{b:02X}{g:02X}{r:02X}"
-        
-        return pixel_color_bgr_hex
-        
-    except (ValueError, OSError) as e:
+    except Exception as e:
         tprint(f"Error: Could not read pixel at {coord}. Details: {e}")
         return None
 
@@ -147,10 +107,11 @@ def scroll(amount: int):
     Args:
         amount: The number of "clicks" to scroll. Positive scrolls down, negative scrolls up.
     """
-    roblox()
-    # pydirectinput: positive value scrolls UP, negative scrolls DOWN.
-    # We invert the amount to match the intuitive logic (positive = down).
-    pdi.scroll(-amount)
+    roblox() # Called for activation; the returned tuple is ignored
+    direction = "wheeldown" if amount > 0 else "wheelup"
+
+    for _ in range(abs(amount)):
+        ahk.click(button=direction)
 
 
 def pixel_matches(coord: tuple[float, float], color: str) -> bool:
@@ -159,27 +120,18 @@ def pixel_matches(coord: tuple[float, float], color: str) -> bool:
 
     Args:
         coord: A tuple (x, y) with relative coordinates (0.0 to 1.0).
-        color: The BGR hex color string to match (e.g., "0xFF0000" for blue).
+        color: The BGR hex color string to match.
 
     Returns:
         True if the pixel color matches, False otherwise.
     """
-    win = roblox(activate=False)
-    win_x, win_y, width, height = win.box
-
-    abs_x = win_x + (coord[0] * width)
-    abs_y = win_y + (coord[1] * height)
-
     try:
-        # pyautogui.pixel() returns an (R, G, B) tuple.
-        r, g, b = pyautogui.pixel(int(abs_x), int(abs_y))
-
-        # Convert RGB to a BGR hex string to match AHK's format.
-        pixel_color_bgr_hex = f"0x{b:02X}{g:02X}{r:02X}"
-
-        return pixel_color_bgr_hex.lower() == color.lower()
-    except OSError:
-        tprint(f"Warning: Could not read pixel at ({int(abs_x)}, {int(abs_y)}).")
+        pixel_color = get_pixel_color(coord)
+        if pixel_color is None:
+            return False
+        return pixel_color.lower() == color.lower()
+    except Exception as e:
+        tprint(f"Warning: Could not read pixel at {coord}. Details: {e}")
         return False
 
 
@@ -240,24 +192,24 @@ def keys(
         interval: Time in seconds to wait between key presses.
         simultaneous: If True, press all keys down together, hold, then release.
     """
-    roblox()
+    roblox() # Called for activation; the returned tuple is ignored
 
     if simultaneous:
         for key in keys_to_press:
-            pdi.keyDown(key)
+            ahk.key_down(key)
             sleep(interval)
 
-        # Hold for the remaining duration
-        hold_time = duration - (interval * len(list(keys_to_press)))
-        if hold_time > 0:
-            sleep(hold_time)
+        sleep(duration)
 
         for key in keys_to_press:
-            pdi.keyUp(key)
+            ahk.key_up(key)
             sleep(interval)
     else:
         for key in keys_to_press:
-            pdi.press(key, presses=1, interval=interval, duration=duration)
+            ahk.key_down(key)
+            sleep(duration)
+            ahk.key_up(key)
+            sleep(interval)
 
 
 def key(key_to_press: str, duration: float = 0):
@@ -271,7 +223,12 @@ def key(key_to_press: str, duration: float = 0):
     keys([key_to_press], duration=duration)
 
 
-def click(coord: tuple[float, float] | None = None, double: bool = True, and_wait: float = 0.2, right=False):
+def click(
+    coord: tuple[float, float] | None = None,
+    double: bool = True,
+    and_wait: float = 0.2,
+    right: bool = False,
+):
     """
     Performs a mouse click.
 
@@ -279,19 +236,18 @@ def click(coord: tuple[float, float] | None = None, double: bool = True, and_wai
         coord: Optional relative coordinates to move to before clicking.
         double: If True, performs a double click.
         and_wait: Time in seconds to wait before the click.
-        right: right click?
+        right: If True, performs a right click.
     """
-    roblox()
+    roblox() # Called for activation; the returned tuple is ignored
 
     if coord is not None:
         mouse_move(coord)
 
     if and_wait > 0:
         sleep(and_wait)
-        
+
     button = "right" if right else "left"
 
+    ahk.click(button=button)
     if double:
-        pdi.doubleClick(button=button)
-    else:
-        pdi.click(button=button)
+        ahk.click(button=button)
