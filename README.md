@@ -15,6 +15,7 @@ Currently assumes:
   - You are using the default pitch. Do not touch it after join.
   - It will only adjust the scroll once; do not touch it often.
   - You may change yaw; it resets it often.
+  - The camera is perfectly straight. You can get it perfect by joining the game fresh or standing in spawn and using the floor patterns to align with the monitor's edge.
   - You are not currently doing potion tower while boss hour (although it will correct itself eventually).
   - You are not sprinting by default.
   

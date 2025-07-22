@@ -157,7 +157,12 @@ class CardClasher:
         roblox()
         self.respawn()
         self.set_deck(DECK_SLOTS.boss)
-        key('w', 9.8)
+        keys("as", 1.1, simultaneous=True)
+        keys("a", 0.8, simultaneous=True)
+        keys("s", 1.53, simultaneous=True)
+        keys("as", 7.35, simultaneous=True)
+        # to put the boss in better view
+        keys("sd", 0.2, simultaneous=True)
         self.dismiss()
         sleep(0.5)
         keys("eeeeeee", interval=0.3)
@@ -166,12 +171,12 @@ class CardClasher:
         roblox()
         self.respawn(key=3)
         self.set_deck(DECK_SLOTS.potion)
-        key("d", .95)
-        key("w", 4.5)
+        keys("sd", 1.1, simultaneous=True)
+        key("d", 4.4)
         sleep(0.5)
         click(START_POTS)
         self.close_menu()
-        key("s", .7)
+        key("a", 1)
 
     def try_close_battle(self, instant: bool = False):
         """
@@ -203,9 +208,9 @@ class CardClasher:
         """
         self.__init__()
         roblox()
-        key("i", duration=1.5)
-        key("o", duration=1.5)
         self.set_tower_delay(1)
+        key("i", 1.5)
+        key("o", 1.5)
         self.set_sprint(True)
 
     def set_sprint(self, sprint: bool):
