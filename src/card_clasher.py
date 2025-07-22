@@ -2,6 +2,8 @@ import datetime
 import webbrowser
 from time import sleep, time
 from typing import final
+from PIL import Image
+import numpy as np
 
 from body import (
     roblox,
@@ -29,7 +31,9 @@ from config import (
     START_POTS,
     TELEPORT,
 )
+from ocr import fetch_screen, read_text
 from utils.logging import tprint
+from utils.types import Rect
 
 # TODO: general check for failure and do a top level restart & rejoin
 
@@ -212,6 +216,50 @@ class CardClasher:
         key("i", 1.5)
         key("o", 1.5)
         self.set_sprint(True)
+        
+    def align_cam(self):
+        key("i", 1.5)
+        key("o", .3)
+        # attempt to put the target at this position
+        target_pos = np.array([.5, .1])
+        # the amnt of time per screen distance during a step.
+        # measured for the horizontal, computed for the vertical with aspect ratio
+        step_ratio = .82
+        # filters for the PLAY text
+        color = (40, 169, 255)
+        tolerance = .1 * 255
+
+        for _ in range(4):
+            img = fetch_screen(Rect((0,0), (1,1)))
+            # filter for pixels within tolerance of the target color
+            mask = np.all(np.abs(img[:,:] - color) <= tolerance, axis=2)
+            # convert back into an image form
+            img = (mask * 255).astype(np.uint8)
+            # get the centroid, average of the bounding box
+            reads = read_text(img)
+            # reads = list(filter(lambda x: x[0].strip().upper() == "PLAY", reads))
+
+            if len(reads) == 0:
+                raise RuntimeError("Make sure the PLAY area's text is entirely in view.")
+
+            read = reads[0]
+            center = np.array(read[1]).sum(axis=0) / 4
+            # normalize for window shape
+            win = roblox(activate=False)
+            center /= np.array([win.width, win.height])
+            # adjust based on the diff
+            diff = target_pos - center
+            # convert delta into time
+            aspect_ratio = win.height / win.width
+            diff *= np.array([step_ratio, step_ratio * aspect_ratio])
+
+            # execute adjustment
+            if diff[0] > 0:
+                key('left', abs(diff[0]))
+            else:
+                key('right', abs(diff[0]))
+            # TODO: adjust the pitch
+        key("o", 1.5)
 
     def set_sprint(self, sprint: bool):
         roblox()

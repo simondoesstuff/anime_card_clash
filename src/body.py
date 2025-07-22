@@ -204,7 +204,7 @@ def until_pixel(coord: tuple[float, float], color: str, timeout: float = 15) -> 
     return True
 
 
-def until_text(region: Rect, text: str, timeout: int = 15, window_title: str = "Roblox") -> bool:
+def until_text(region: Rect, text: str, timeout: int = 15) -> bool:
     """
     Waits until specific text appears in a given region of the window.
 
@@ -214,7 +214,7 @@ def until_text(region: Rect, text: str, timeout: int = 15, window_title: str = "
     start_time = datetime.datetime.now()
     mouse_move(DISMISS)  # Move mouse away
 
-    while not ocr.try_text(region, text, window_title):
+    while not ocr.try_text(region, text):
         if datetime.datetime.now() - start_time > datetime.timedelta(seconds=timeout):
             tprint(f"Timeout while waiting for text '{text}' in region {region}")
             return False
