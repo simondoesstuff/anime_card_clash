@@ -75,7 +75,7 @@ class CardClasher:
             return
 
         click(lobby)
-        sleep(1.5)
+        sleep(3)
 
     def close_menu(self):
         roblox()
@@ -84,22 +84,22 @@ class CardClasher:
     def stop_boss(self):
         roblox()
 
-        def toggle_auto_raid():
-            mouse_move(SETTINGS.button)
-            click()
-            sleep(0.2)
-            mouse_move(CENTER)
-            scroll(7)
-            sleep(0.5)
-            mouse_move(SETTINGS.raid_restart)
-            click(double=False)
-            mouse_move(SETTINGS.close)
-            click()
+        # def toggle_auto_raid():
+        #     mouse_move(SETTINGS.button)
+        #     click()
+        #     sleep(0.2)
+        #     mouse_move(CENTER)
+        #     scroll(7)
+        #     sleep(0.5)
+        #     mouse_move(SETTINGS.raid_restart)
+        #     click(double=False)
+        #     mouse_move(SETTINGS.close)
+        #     click()
 
-        toggle_auto_raid()
+        # toggle_auto_raid()
         sleep(13)
-        toggle_auto_raid()
-        sleep(1)
+        # toggle_auto_raid()
+        # sleep(1)
 
     def set_tower_delay(self, delay: int):
         """
