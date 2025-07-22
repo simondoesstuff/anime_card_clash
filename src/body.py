@@ -271,7 +271,7 @@ def key(key_to_press: str, duration: float = 0):
     keys([key_to_press], duration=duration)
 
 
-def click(coord: tuple[float, float] | None = None, double: bool = True, and_wait: float = 0.2):
+def click(coord: tuple[float, float] | None = None, double: bool = True, and_wait: float = 0.2, right=False):
     """
     Performs a mouse click.
 
@@ -279,6 +279,7 @@ def click(coord: tuple[float, float] | None = None, double: bool = True, and_wai
         coord: Optional relative coordinates to move to before clicking.
         double: If True, performs a double click.
         and_wait: Time in seconds to wait before the click.
+        right: right click?
     """
     roblox()
 
@@ -287,8 +288,10 @@ def click(coord: tuple[float, float] | None = None, double: bool = True, and_wai
 
     if and_wait > 0:
         sleep(and_wait)
+        
+    button = "right" if right else "left"
 
     if double:
-        pdi.doubleClick()
+        pdi.doubleClick(button=button)
     else:
-        pdi.click()
+        pdi.click(button=button)

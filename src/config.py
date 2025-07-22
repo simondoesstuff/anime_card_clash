@@ -34,6 +34,6 @@ DECK_SLOTS = SimpleNamespace(
 DISCONNECT = SimpleNamespace(
     left=(0.4, 0.4), right=(0.6, 0.4), button=(0.55, 0.58), background="0x393B3D"
 )
+FIGHT=(.5, .45)
 # used for rejoining the game on severe failure
 JOIN_LINK = "https://www.roblox.com/games/start?placeId=110829983956014"
-
