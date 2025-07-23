@@ -9,6 +9,13 @@
       "cwd": "${workspaceFolder}"
     },
     {
+      "name": "uv: rejoin",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "(echo 'rejoin' && echo 'all') | uv run src",
+      "cwd": "${workspaceFolder}"
+    },
+    {
       "name": "uv: cli",
       "type": "node-terminal",
       "request": "launch",
