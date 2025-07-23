@@ -16,14 +16,14 @@ reader = easyocr.Reader(["en"])
     
     
 def fetch_screen(scan_region: Rect):
-    target_window = body.roblox(activate=False)
+    x, y, w, h = body.roblox(activate=False)
 
     # --- Determine Capture Coordinates ---
     capture_coords = {
-        "top": target_window.top + int(scan_region.pos[1] * target_window.height),
-        "left": target_window.left + int(scan_region.pos[0] * target_window.width),
-        "width": int(scan_region.size[0] * target_window.width),
-        "height": int(scan_region.size[1] * target_window.height),
+        "top": y + int(scan_region.pos[1] * h),
+        "left": x + int(scan_region.pos[0] * w),
+        "width": int(scan_region.size[0] * w),
+        "height": int(scan_region.size[1] * h)
     }
 
     # --- Screen Capture and OCR ---
