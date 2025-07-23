@@ -68,7 +68,7 @@ class CardClasher:
             return
 
         lobby = TELEPORT.lobby
-        keyed_item = ( lobby[0], lobby[1] + TELEPORT.offset * key )
+        keyed_item = (lobby[0], lobby[1] + TELEPORT.offset * key)
 
         click(keyed_item)
         sleep(1.5)
@@ -216,23 +216,23 @@ class CardClasher:
         key("i", 1.5)
         key("o", 1.5)
         self.set_sprint(True)
-        
+
     def align_cam(self):
         key("i", 1.5)
-        key("o", .3)
+        key("o", 0.3)
         # attempt to put the target at this position
-        target_pos = np.array([.5, .1])
+        target_pos = np.array([0.5, 0.1])
         # the amnt of time per screen distance during a step.
         # measured for the horizontal, computed for the vertical with aspect ratio
-        step_ratio = .82
+        step_ratio = 0.82
         # filters for the PLAY text
         color = (40, 169, 255)
-        tolerance = .1 * 255
+        tolerance = 0.1 * 255
 
         for _ in range(4):
-            img = fetch_screen(Rect((0,0), (1,1)))
+            img = fetch_screen(Rect((0, 0), (1, 1)))
             # filter for pixels within tolerance of the target color
-            mask = np.all(np.abs(img[:,:] - color) <= tolerance, axis=2)
+            mask = np.all(np.abs(img[:, :] - color) <= tolerance, axis=2)
             # convert back into an image form
             img = (mask * 255).astype(np.uint8)
             # get the centroid, average of the bounding box
@@ -240,7 +240,9 @@ class CardClasher:
             # reads = list(filter(lambda x: x[0].strip().upper() == "PLAY", reads))
 
             if len(reads) == 0:
-                raise RuntimeError("Make sure the PLAY area's text is entirely in view.")
+                raise RuntimeError(
+                    "Make sure the PLAY area's text is entirely in view."
+                )
 
             read = reads[0]
             center = np.array(read[1]).sum(axis=0) / 4
@@ -255,9 +257,9 @@ class CardClasher:
 
             # execute adjustment
             if diff[0] > 0:
-                key('left', abs(diff[0]))
+                key("left", abs(diff[0]))
             else:
-                key('right', abs(diff[0]))
+                key("right", abs(diff[0]))
             # TODO: adjust the pitch
         key("o", 1.5)
 
@@ -316,7 +318,7 @@ class CardClasher:
                 else:
                     self.start_pots()
 
-            if loop % 75 == 0:
+            if loop % 45 == 0:
                 self.dismiss()
 
             # TODO: make this a config option
