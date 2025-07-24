@@ -9,10 +9,17 @@
       "cwd": "${workspaceFolder}"
     },
     {
+      "name": "uv: afk",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "echo 'afk' | uv run src",
+      "cwd": "${workspaceFolder}"
+    },
+    {
       "name": "uv: rejoin",
       "type": "node-terminal",
       "request": "launch",
-      "command": "(echo 'rejoin' && echo 'all') | uv run src",
+      "command": "powershell -Command \"function Send-Commands { 'rejoin'; Start-Sleep 7; 'all' }; Send-Commands | uv run src\"",
       "cwd": "${workspaceFolder}"
     },
     {

@@ -18,6 +18,10 @@ class CLI:
         """Start the main functionality"""
         self.cc.main()
 
+    def afk(self):
+        """Start AFK loop - only handles disconnections, no auto battles"""
+        self.cc.afk_loop()
+
     def stop_pots(self):
         return self.cc.stop_pots()
 
@@ -56,13 +60,13 @@ class CLI:
         duration = float(duration_str)
         body.roblox()
         body.keys(key, duration, simultaneous=True)
-            
+
     def key_time(self, key: str, duration_str: str):
         time.sleep(1)
         duration = float(duration_str)
         body.roblox()
         body.key(key, duration)
-        
+
     def key_instr(self, *instrs: str):
         time.sleep(1)
         body.roblox()
@@ -112,7 +116,9 @@ def run_cli_loop(cli_instance):
                         continue
                     method(*args)
                 else:
-                    print(f"Error: Unknown command '{command}'. Type 'help' for options.")
+                    print(
+                        f"Error: Unknown command '{command}'. Type 'help' for options."
+                    )
             except TypeError as e:
                 # Provides more specific feedback on argument mismatches
                 print(

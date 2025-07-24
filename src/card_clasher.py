@@ -151,7 +151,7 @@ class CardClasher:
     def set_deck(self, deck: int):
         roblox()
         self.dismiss()
-        click(DECK.button)
+        click(DECK.button, and_wait=0.5)
         coord = (DECK.deck1[0] + DECK.offset * (deck - 1), DECK.deck1[1])
         click(coord, and_wait=0.5)
         self.close_menu()
@@ -279,6 +279,62 @@ class CardClasher:
         except webbrowser.Error as e:
             tprint(f"[bold red]An error occurred: {e}[/bold red]")
             raise e
+
+    def afk_loop(self):
+        """
+        AFK loop that only handles disconnections and rejoining,
+        without automatically starting boss or pots battles.
+        """
+        tprint("Starting [cyan bold]AFK loop[/cyan bold] - no auto battles will start")
+        tprint("[italic]Only monitoring connection and rejoining if needed[/italic]\n")
+        self.clean()
+
+        loop = 0
+        time_since_success = time()
+
+        while True:
+            if not self.is_connected():
+                tprint("[bold red]Disconnected, reconnecting...[/bold red]")
+                click(DISCONNECT.button)
+                sleep(12)
+                self.clean()
+
+            if loop % 45 == 0:
+                self.dismiss()
+
+            # TODO: make this a config option
+            if pixel_matches(
+                (0.7859375, 0.053703703703703705), "0xFFFFFF"
+            ) or pixel_matches((0.9713541666666666, 0.040740740740740744), "0xFFFFFF"):
+                tprint(
+                    "[bold red]UI Nav mode detected stuck on, toggling off...[/bold red]"
+                )
+                key("\\")
+
+            if pixel_matches(BATTLE_STATUS.while_closed, BATTLE_STATUS_COLOR):
+                time_since_success = time()
+            elif pixel_matches(BATTLE_STATUS.while_open, BATTLE_STATUS_COLOR):
+                tprint(
+                    "[bold red]Battle status is detected stuck "
+                    + "open, will try to close[/bold red]"
+                )
+                self.try_close_battle(instant=True)
+                key("\\")
+
+            if time() - time_since_success >= 300:
+                tprint(
+                    "[bold red]Out of battle for 5m. "
+                    + "Something has gone seriously wrong. "
+                    + "Rejoining...[/bold red]"
+                )
+                self.rejoin()
+                sleep(20)
+                self.clean()
+                time_since_success = time()
+                continue
+
+            loop += 1
+            sleep(1)
 
     def main(self):
         tprint("Hello from [magenta bold]anime-card-clash[/magenta bold]! :)")
